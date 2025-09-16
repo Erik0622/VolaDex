@@ -1,4 +1,7 @@
+
 import type { UTCTimestamp } from 'lightweight-charts';
+=======
+
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
@@ -54,7 +57,11 @@ async function fetchBirdeyeCandles(address: string, interval: string): Promise<C
 
   const mapped: CandleDatum[] = rawItems
     .map((item: any) => {
+
       const rawTime = Number(item?.unixTime ?? item?.time ?? item?.timestamp ?? 0);
+=======
+      const time = Number(item?.unixTime ?? item?.time ?? item?.timestamp ?? 0);
+
       const open = Number(item?.open ?? item?.o ?? item?.priceOpen ?? item?.startPrice ?? item?.value ?? 0);
       const high = Number(item?.high ?? item?.h ?? item?.priceHigh ?? item?.max ?? open);
       const low = Number(item?.low ?? item?.l ?? item?.priceLow ?? item?.min ?? open);
@@ -67,6 +74,11 @@ async function fetchBirdeyeCandles(address: string, interval: string): Promise<C
 
       return {
         time: normalizedTime,
+=======
+      if (!time) return null;
+      return {
+        time,
+
         open,
         high,
         low,
@@ -74,7 +86,11 @@ async function fetchBirdeyeCandles(address: string, interval: string): Promise<C
         volume,
       } satisfies CandleDatum;
     })
+
     .filter((item): item is CandleDatum => Boolean(item));
+=======
+    .filter(Boolean);
+
 
   if (!mapped.length) {
     throw new Error('Unable to map Birdeye candles');

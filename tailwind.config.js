@@ -6,6 +6,9 @@ export default {
     extend: {
       fontFamily: {
         sans: ['"Satoshi"', 'ui-sans-serif', 'system-ui'],
+=======
+        sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui'],
+
         mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular'],
       },
       colors: {

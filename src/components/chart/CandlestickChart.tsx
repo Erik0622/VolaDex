@@ -94,7 +94,11 @@ export function CandlestickChart({ data }: CandlestickChartProps) {
   useEffect(() => {
     if (!candleSeriesRef.current || !baselineSeriesRef.current) return;
     const mapped = data.map((item) => ({
+
       time: item.time,
+=======
+      time: item.time as number,
+
       open: item.open,
       high: item.high,
       low: item.low,
@@ -103,7 +107,11 @@ export function CandlestickChart({ data }: CandlestickChartProps) {
 
     candleSeriesRef.current.setData(mapped);
     baselineSeriesRef.current.setData(
+
       data.map((item) => ({ time: item.time, value: item.close })),
+=======
+      data.map((item) => ({ time: item.time as number, value: item.close })),
+
     );
 
     chartRef.current?.timeScale().fitContent();

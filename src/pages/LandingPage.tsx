@@ -37,6 +37,7 @@ const features = [
   },
 ];
 
+
 const capabilityModules = [
   {
     title: 'Command center workspace',
@@ -113,6 +114,7 @@ const opsTimeline = [
     status: 'Logged',
   },
 ];
+
 
 function TerminalPreview() {
   return (
@@ -239,6 +241,7 @@ function MarketPulse() {
   );
 }
 
+
 function ExperienceStack() {
   return (
     <section className="border-y border-white/5 py-24" id="workflow">
@@ -324,6 +327,7 @@ function ExperienceStack() {
   );
 }
 
+
 function LandingPage() {
   return (
     <div className="relative">
@@ -406,7 +410,10 @@ function LandingPage() {
         </div>
       </section>
 
+
       <ExperienceStack />
+
+
 
       <section className="py-24" id="insights">
         <div className="mx-auto flex max-w-7xl flex-col gap-16 px-6 lg:flex-row lg:items-center">
