@@ -37,6 +37,85 @@ const features = [
   },
 ];
 
+
+const capabilityModules = [
+  {
+    title: 'Command center workspace',
+    description:
+      'Swap between macro watchlists, execution view and strategy builder instantly with synchronized context panes.',
+    metrics: [
+      { label: 'Workspace latency', value: '<8ms' },
+      { label: 'Linked canvases', value: '6' },
+      { label: 'Focus presets', value: 'Flow · Execution · Research' },
+    ],
+    tags: ['Focus mode', 'Keyboard-first', 'Adaptive grid'],
+  },
+  {
+    title: 'Intelligence mesh',
+    description:
+      'Helius flows, Birdeye depth and Pump.fun launches braided into a single AI-ranked alert stack for your desk.',
+    metrics: [
+      { label: 'Signal refresh', value: '15s cadence' },
+      { label: 'Wallet clusters', value: '120 tracked' },
+      { label: 'Sentiment scoring', value: 'Neural contextual' },
+    ],
+    tags: ['Helius fused', 'Birdeye depth', 'AI curation'],
+  },
+  {
+    title: 'Post-trade clarity',
+    description:
+      'Granular audit trails, smart reconciliations and automated reports so compliance is as elegant as the UI.',
+    metrics: [
+      { label: 'Reconciliation', value: 'Real time' },
+      { label: 'Reports generated', value: 'SOC2 ready' },
+      { label: 'Workflow automations', value: '30+ blocks' },
+    ],
+    tags: ['Audit-ready', 'Custody sync', 'Enterprise'],
+  },
+];
+
+const connectivityHighlights = [
+  {
+    title: 'Liquidity venues',
+    description: 'Phoenix, OpenBook, Meteora, Jupiter and more with adaptive routing heuristics.',
+    metric: 'Depth coverage 99.4%',
+  },
+  {
+    title: 'Risk systems',
+    description: 'Real-time VaR, delta and gamma monitors with scenario modelling piped to every workspace.',
+    metric: 'Updates every 60s',
+  },
+  {
+    title: 'Operational stack',
+    description: 'Ledger, Fireblocks, Slack, Notion and custom webhooks orchestrated through automation blocks.',
+    metric: '38 integrations',
+  },
+];
+
+const opsTimeline = [
+  {
+    phase: 'Scan',
+    description: 'AI observes mempool, social velocity and funding skew to surface emerging catalysts.',
+    status: 'Live',
+  },
+  {
+    phase: 'Decide',
+    description: 'Desk receives ranked playbooks with risk deltas, liquidity routes and automation suggestions.',
+    status: 'In-flight',
+  },
+  {
+    phase: 'Execute',
+    description: 'Smart order router simulates impact, slices orders and syncs hedges without triggering real trades here.',
+    status: 'Simulated',
+  },
+  {
+    phase: 'Review',
+    description: 'Post-trade dashboards log fills, compliance flags and alpha notes for every cycle.',
+    status: 'Logged',
+  },
+];
+
+
 function TerminalPreview() {
   return (
     <div className="relative mx-auto max-w-3xl rounded-[36px] border border-white/10 bg-white/5 p-10 shadow-panel backdrop-blur-2xl">
@@ -162,6 +241,93 @@ function MarketPulse() {
   );
 }
 
+
+function ExperienceStack() {
+  return (
+    <section className="border-y border-white/5 py-24" id="workflow">
+      <div className="mx-auto max-w-7xl space-y-12 px-6">
+        <SectionHeader
+          eyebrow="Workflow engine"
+          title="Every trading discipline wired into one command center"
+          description="Purpose-built modules keep discovery, execution and reporting inside a single cinematic flow."
+        />
+        <div className="grid gap-6 lg:grid-cols-3">
+          {capabilityModules.map((module) => (
+            <div
+              key={module.title}
+              className="group relative overflow-hidden rounded-[32px] border border-white/10 bg-gradient-to-br from-white/10 via-black/40 to-black/80 p-8"
+            >
+              <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+              <div className="relative flex h-full flex-col gap-6">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent-300">Desk module</p>
+                  <h3 className="mt-2 text-xl font-semibold text-white">{module.title}</h3>
+                  <p className="mt-3 text-sm text-white/70">{module.description}</p>
+                </div>
+                <div className="space-y-3 text-xs">
+                  {module.metrics.map((metric) => (
+                    <div
+                      key={metric.label}
+                      className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white/60"
+                    >
+                      <span className="uppercase tracking-[0.3em]">{metric.label}</span>
+                      <span className="font-mono text-sm text-white">{metric.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-auto flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.35em] text-white/40">
+                  {module.tags.map((tag) => (
+                    <span key={tag} className="rounded-full border border-white/10 px-3 py-1">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="glass-panel grid gap-8 rounded-[36px] border border-white/10 bg-white/5 p-8 lg:grid-cols-[1.2fr_1fr]">
+          <div className="space-y-6">
+            <h4 className="text-sm font-semibold uppercase tracking-[0.3em] text-white/60">Connectivity matrix</h4>
+            <ul className="space-y-4 text-sm text-white/70">
+              {connectivityHighlights.map((item) => (
+                <li key={item.title} className="rounded-3xl border border-white/10 bg-black/40 p-5">
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="text-base font-semibold text-white">{item.title}</p>
+                    <span className="text-xs font-mono uppercase tracking-[0.3em] text-accent-300">{item.metric}</span>
+                  </div>
+                  <p className="mt-3 text-xs text-white/50">{item.description}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="space-y-6">
+            <h4 className="text-sm font-semibold uppercase tracking-[0.3em] text-white/60">Operator timeline</h4>
+            <div className="relative rounded-3xl border border-white/10 bg-black/40 p-6">
+              <div className="absolute left-5 top-6 bottom-6 w-px bg-gradient-to-b from-accent-400/60 via-white/10 to-transparent" />
+              <div className="space-y-6">
+                {opsTimeline.map((step, index) => (
+                  <div key={step.phase} className="relative pl-10">
+                    <span className="absolute left-0 top-1 flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-black/80 text-[10px] font-semibold uppercase tracking-[0.3em] text-white/60">
+                      {index + 1}
+                    </span>
+                    <p className="text-sm font-semibold text-white">{step.phase}</p>
+                    <p className="mt-1 text-xs text-white/50">{step.description}</p>
+                    <span className="mt-2 inline-flex rounded-full border border-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-accent-300">
+                      {step.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
 function LandingPage() {
   return (
     <div className="relative">
@@ -243,6 +409,11 @@ function LandingPage() {
           </div>
         </div>
       </section>
+
+
+      <ExperienceStack />
+
+
 
       <section className="py-24" id="insights">
         <div className="mx-auto flex max-w-7xl flex-col gap-16 px-6 lg:flex-row lg:items-center">

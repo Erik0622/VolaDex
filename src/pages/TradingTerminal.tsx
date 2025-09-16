@@ -10,6 +10,12 @@ import { StrategyPanel } from '../components/trading/StrategyPanel';
 import { TimeframeSelector } from '../components/trading/TimeframeSelector';
 import { TradeTape } from '../components/trading/TradeTape';
 import { TradingStatsBar } from '../components/trading/TradingStatsBar';
+
+import { PortfolioOverview } from '../components/trading/PortfolioOverview';
+import { SystemHealth } from '../components/trading/SystemHealth';
+import { AlphaFeed } from '../components/trading/AlphaFeed';
+=======
+
 import { tokenMarkets } from '../data/markets';
 import { asks, bids, recentTrades } from '../data/sampleOrderBook';
 import { usePriceData } from '../hooks/usePriceData';
@@ -103,7 +109,11 @@ function TradingTerminal() {
       };
     }
 
+
+    const sorted = [...candles].sort((a, b) => Number(a.time) - Number(b.time));
+=======
     const sorted = [...candles].sort((a, b) => a.time - b.time);
+
     const first = sorted[0];
     const last = sorted[sorted.length - 1];
     const high = sorted.reduce((max, item) => Math.max(max, item.high), -Infinity);
@@ -146,8 +156,13 @@ function TradingTerminal() {
             </Link>
             <h1 className="text-4xl font-semibold text-white">VolaDex Terminal</h1>
             <p className="max-w-xl text-sm text-white/60">
+
+              Precision-engineered Solana trading workstation. Charts, liquidity, automation, portfolio health and alpha streams –
+              all elevated. Trading actions are disabled in this showcase so you can explore design and analytics freely.
+=======
               Precision-engineered Solana trading workstation. Charts, liquidity, automation – all elevated. Trading actions are
               disabled in this showcase so you can explore design and analytics freely.
+
             </p>
           </div>
           <div className="rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-xs uppercase tracking-[0.3em] text-white/50">
@@ -296,6 +311,15 @@ function TradingTerminal() {
           </div>
         </div>
       </div>
+
+
+      <div className="grid gap-8 lg:grid-cols-3">
+        <PortfolioOverview />
+        <SystemHealth />
+        <AlphaFeed />
+      </div>
+=======
+
     </div>
   );
 }

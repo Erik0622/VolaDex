@@ -1,4 +1,8 @@
+
+import { Bolt, Cpu, Radar, Shield, Sparkles } from 'lucide-react';
+=======
 import { Bolt, Cpu, Radar } from 'lucide-react';
+
 
 export function StrategyPanel() {
   const items = [
@@ -20,6 +24,21 @@ export function StrategyPanel() {
       description: 'Pulls Helius wallet clusters to detect inflows to top 25 vaults in real time.',
       status: 'Live',
     },
+
+    {
+      icon: <Shield className="h-4 w-4" />,
+      title: 'Compliance autopilot',
+      description: 'Captures immutable audit trails, policy notes and desk sign-offs with zero friction.',
+      status: 'Ready',
+    },
+    {
+      icon: <Sparkles className="h-4 w-4" />,
+      title: 'Alpha synthesizer',
+      description: 'LLM-powered summaries translate data spikes into desk-ready talking points.',
+      status: 'Drafting',
+    },
+=======
+
   ];
 
   return (

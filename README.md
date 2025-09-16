@@ -58,8 +58,13 @@ workstation could feel like. **Trading actions are intentionally disabled – th
    | ------------- | ----------------------------------- |
    | `npm run dev` | Start the Vite development server.  |
    | `npm run build` | Type-check and produce a production build. |
+  | `npm run preview` | Preview the production build locally. |
+  | `npm run lint` | Run ESLint on the entire project.   |
+  | `npm run check:conflicts` | Ensure no merge markers (`&lt;&lt;&lt;&lt;&lt;&lt;&lt;` / `&gt;&gt;&gt;&gt;&gt;&gt;&gt;`) slipped into the repo. |
+=======
    | `npm run preview` | Preview the production build locally. |
    | `npm run lint` | Run ESLint on the entire project.   |
+
 
 ## 📡 Data model & fallbacks
 
