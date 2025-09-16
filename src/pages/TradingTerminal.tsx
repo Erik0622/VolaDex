@@ -14,7 +14,6 @@ import { TradingStatsBar } from '../components/trading/TradingStatsBar';
 import { PortfolioOverview } from '../components/trading/PortfolioOverview';
 import { SystemHealth } from '../components/trading/SystemHealth';
 import { AlphaFeed } from '../components/trading/AlphaFeed';
-=======
 
 import { tokenMarkets } from '../data/markets';
 import { asks, bids, recentTrades } from '../data/sampleOrderBook';
@@ -111,8 +110,6 @@ function TradingTerminal() {
 
 
     const sorted = [...candles].sort((a, b) => Number(a.time) - Number(b.time));
-=======
-    const sorted = [...candles].sort((a, b) => a.time - b.time);
 
     const first = sorted[0];
     const last = sorted[sorted.length - 1];
@@ -159,9 +156,6 @@ function TradingTerminal() {
 
               Precision-engineered Solana trading workstation. Charts, liquidity, automation, portfolio health and alpha streams –
               all elevated. Trading actions are disabled in this showcase so you can explore design and analytics freely.
-=======
-              Precision-engineered Solana trading workstation. Charts, liquidity, automation – all elevated. Trading actions are
-              disabled in this showcase so you can explore design and analytics freely.
 
             </p>
           </div>
@@ -318,8 +312,6 @@ function TradingTerminal() {
         <SystemHealth />
         <AlphaFeed />
       </div>
-=======
-
     </div>
   );
 }

@@ -1,8 +1,6 @@
 
 import type { UTCTimestamp } from 'lightweight-charts';
 
-=======
-
 import type { CandleDatum } from '../types/trading';
 
 const startTimestamp = Math.floor(Date.now() / 1000) - 60 * 120;
@@ -20,9 +18,6 @@ function generateCandle(index: number): CandleDatum {
 
   return {
     time,
-=======
-  return {
-    time: startTimestamp + index * 60,
 
     open: Number(open.toFixed(2)),
     high: Number(high.toFixed(2)),

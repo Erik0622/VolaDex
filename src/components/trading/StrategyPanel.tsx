@@ -1,7 +1,5 @@
 
 import { Bolt, Cpu, Radar, Shield, Sparkles } from 'lucide-react';
-=======
-import { Bolt, Cpu, Radar } from 'lucide-react';
 
 
 export function StrategyPanel() {
@@ -37,8 +35,6 @@ export function StrategyPanel() {
       description: 'LLM-powered summaries translate data spikes into desk-ready talking points.',
       status: 'Drafting',
     },
-=======
-
   ];
 
   return (

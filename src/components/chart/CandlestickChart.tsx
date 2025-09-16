@@ -96,8 +96,6 @@ export function CandlestickChart({ data }: CandlestickChartProps) {
     const mapped = data.map((item) => ({
 
       time: item.time,
-=======
-      time: item.time as number,
 
       open: item.open,
       high: item.high,
@@ -109,8 +107,6 @@ export function CandlestickChart({ data }: CandlestickChartProps) {
     baselineSeriesRef.current.setData(
 
       data.map((item) => ({ time: item.time, value: item.close })),
-=======
-      data.map((item) => ({ time: item.time as number, value: item.close })),
 
     );
 

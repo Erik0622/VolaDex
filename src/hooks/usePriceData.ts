@@ -1,6 +1,5 @@
 
 import type { UTCTimestamp } from 'lightweight-charts';
-=======
 
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -59,8 +58,6 @@ async function fetchBirdeyeCandles(address: string, interval: string): Promise<C
     .map((item: any) => {
 
       const rawTime = Number(item?.unixTime ?? item?.time ?? item?.timestamp ?? 0);
-=======
-      const time = Number(item?.unixTime ?? item?.time ?? item?.timestamp ?? 0);
 
       const open = Number(item?.open ?? item?.o ?? item?.priceOpen ?? item?.startPrice ?? item?.value ?? 0);
       const high = Number(item?.high ?? item?.h ?? item?.priceHigh ?? item?.max ?? open);
@@ -74,10 +71,6 @@ async function fetchBirdeyeCandles(address: string, interval: string): Promise<C
 
       return {
         time: normalizedTime,
-=======
-      if (!time) return null;
-      return {
-        time,
 
         open,
         high,
@@ -88,8 +81,6 @@ async function fetchBirdeyeCandles(address: string, interval: string): Promise<C
     })
 
     .filter((item): item is CandleDatum => Boolean(item));
-=======
-    .filter(Boolean);
 
 
   if (!mapped.length) {

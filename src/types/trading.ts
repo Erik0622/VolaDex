@@ -3,9 +3,6 @@ import type { UTCTimestamp } from 'lightweight-charts';
 
 export interface CandleDatum {
   time: UTCTimestamp;
-=======
-export interface CandleDatum {
-  time: number;
 
   open: number;
   high: number;
