@@ -69,15 +69,15 @@ function TradingTerminal() {
               <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-accent-400">
                 <ArrowLeft className="h-4 w-4" /> Back to Discover
               </Link>
-              <div className="text-xl font-bold text-white">VolaDex Pro</div>
+              {/* Branding entfernt */}
               <div className="hidden md:flex items-center gap-6">
-                <a href="#" className="text-sm text-white/60 hover:text-white">Pulse</a>
-                <a href="#" className="text-sm text-white/60 hover:text-white">Trackers</a>
-                <a href="#" className="text-sm text-white/60 hover:text-white">Perpetuals</a>
-                <a href="#" className="text-sm text-white/60 hover:text-white">Yield</a>
-                <a href="#" className="text-sm text-white/60 hover:text-white">Vision</a>
-                <a href="#" className="text-sm text-white/60 hover:text-white">Portfolio</a>
-                <a href="#" className="text-sm text-white/60 hover:text-white">Rewards</a>
+                <Link to="/#pulse" className="text-sm text-white/60 hover:text-white">Pulse</Link>
+                <Link to="/#trackers" className="text-sm text-white/60 hover:text-white">Trackers</Link>
+                <Link to="/#perpetuals" className="text-sm text-white/60 hover:text-white">Perpetuals</Link>
+                <Link to="/#yield" className="text-sm text-white/60 hover:text-white">Yield</Link>
+                <Link to="/#vision" className="text-sm text-white/60 hover:text-white">Vision</Link>
+                <Link to="/portfolio" className="text-sm text-white/60 hover:text-white">Portfolio</Link>
+                <Link to="/#rewards" className="text-sm text-white/60 hover:text-white">Rewards</Link>
               </div>
             </div>
             

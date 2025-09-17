@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import { AppLayout } from './components/layout/AppLayout';
 import LandingPage from './pages/LandingPage';
 import TradingTerminal from './pages/TradingTerminal';
+import WalletPage from './pages/WalletPage';
+import PortfolioPage from './pages/PortfolioPage';
 
 function ScrollToTop() {
   const location = useLocation();
@@ -33,6 +35,8 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/trade" element={<TradingTerminal />} />
+          <Route path="/wallet" element={<WalletPage />} />
+          <Route path="/portfolio" element={<PortfolioPage />} />
         </Routes>
       </AppLayout>
     </div>

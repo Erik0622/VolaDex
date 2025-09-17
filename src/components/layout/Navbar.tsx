@@ -22,13 +22,10 @@ export function Navbar() {
           <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 via-primary-600 to-accent-500 shadow-glow">
             <Zap className="h-6 w-6" />
           </span>
-          <div>
-            <p className="text-lg font-semibold tracking-wide">VolaDex</p>
-            <p className="text-xs font-semibold uppercase text-accent-400 tracking-[0.3em]">Solana Terminal</p>
-          </div>
+          {/* Branding-Text entfernt */}
         </Link>
 
-        <nav className="hidden items-center gap-10 text-sm font-medium text-white/70 lg:flex">
+        <nav className="hidden items-center gap-6 text-sm font-medium text-white/70 lg:flex">
           {navItems.map((item) => (
             <NavLink
               key={item.to}

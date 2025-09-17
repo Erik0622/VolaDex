@@ -6,48 +6,10 @@ import { GlowCard } from '../components/ui/GlowCard';
 import { SectionHeader } from '../components/ui/SectionHeader';
 import { StatisticPill } from '../components/ui/StatisticPill';
 import { AnimatedButton } from '../components/ui/AnimatedButton';
-import { marketSummaries } from '../data/sampleMarkets';
-import { formatCompact, formatCurrency, formatPercent } from '../lib/format';
+import { formatCompact } from '../lib/format';
+import { useTrendingMemecoins } from '../hooks/useTrending';
 
-// Sample memecoin data for insights
-const trendingMemecoins = [
-  {
-    name: 'dogwifhat',
-    symbol: 'WIF',
-    logo: '🐕',
-    price: 2.34,
-    change24h: 12.6,
-    volume: 324200000,
-    marketCap: 2340000000
-  },
-  {
-    name: 'Bonk',
-    symbol: 'BONK',
-    logo: '🐕',
-    price: 0.000032,
-    change24h: 7.45,
-    volume: 298000000,
-    marketCap: 2100000000
-  },
-  {
-    name: 'Pepe',
-    symbol: 'PEPE',
-    logo: '🐸',
-    price: 0.0000012,
-    change24h: 18.3,
-    volume: 156800000,
-    marketCap: 1200000000
-  },
-  {
-    name: 'Popcat',
-    symbol: 'POPCAT',
-    logo: '🐱',
-    price: 0.45,
-    change24h: 15.7,
-    volume: 89300000,
-    marketCap: 450000000
-  }
-];
+// Live trending via Birdeye with fallback inside the hook
 
 const features = [
   {
@@ -79,6 +41,7 @@ const features = [
 const categories = ['Trending', 'Surge', 'DEX Screener', 'Pump Live'];
 
 function MemecoinInsights() {
+  const { data: trending, isSuccess, isLoading } = useTrendingMemecoins();
   return (
     <div className="w-full">
       <div className="mb-6 flex items-center justify-between">
@@ -89,14 +52,14 @@ function MemecoinInsights() {
       </div>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {trendingMemecoins.map((coin) => (
+        {(trending ?? []).slice(0, 8).map((coin) => (
           <motion.div
             key={coin.symbol}
             whileHover={{ scale: 1.02 }}
             className="rounded-2xl border border-white/10 bg-black/40 p-4 hover:bg-white/5 transition-colors"
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="text-2xl">{coin.logo}</div>
+              <div className="text-2xl">🔥</div>
               <div>
                 <div className="font-semibold text-white">{coin.name}</div>
                 <div className="text-xs text-white/50">{coin.symbol}</div>
@@ -105,19 +68,17 @@ function MemecoinInsights() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-white/60">Price</span>
-                <span className="font-mono text-sm text-white">
-                  {coin.price < 0.01 ? `$${coin.price.toExponential(2)}` : `$${coin.price.toFixed(4)}`}
-                </span>
+                <span className="font-mono text-sm text-white">{coin.price ? `$${Number(coin.price).toLocaleString()}` : '—'}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-white/60">24h Change</span>
-                <span className={`text-sm font-semibold ${coin.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {coin.change24h >= 0 ? '+' : ''}{coin.change24h.toFixed(1)}%
+                <span className={`text-sm font-semibold ${Number(coin.change24h) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {Number(coin.change24h) >= 0 ? '+' : ''}{Number(coin.change24h).toFixed(2)}%
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-white/60">Volume</span>
-                <span className="font-mono text-xs text-white/70">${formatCompact(coin.volume)}</span>
+                <span className="font-mono text-xs text-white/70">${formatCompact(Number(coin.volume24h))}</span>
               </div>
             </div>
           </motion.div>
@@ -156,16 +117,16 @@ function LandingPage() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-8">
-              <div className="text-xl font-bold text-white">VolaDex Pro</div>
+              {/* Branding entfernt */}
               <div className="hidden md:flex items-center gap-6">
                 <Link to="/" className="text-sm font-medium text-accent-400">Discover</Link>
-                <a href="#" className="text-sm text-white/60 hover:text-white">Pulse</a>
-                <a href="#" className="text-sm text-white/60 hover:text-white">Trackers</a>
-                <a href="#" className="text-sm text-white/60 hover:text-white">Perpetuals</a>
-                <a href="#" className="text-sm text-white/60 hover:text-white">Yield</a>
-                <a href="#" className="text-sm text-white/60 hover:text-white">Vision</a>
-                <a href="#" className="text-sm text-white/60 hover:text-white">Portfolio</a>
-                <a href="#" className="text-sm text-white/60 hover:text-white">Rewards</a>
+                <a href="#pulse" className="text-sm text-white/60 hover:text-white">Pulse</a>
+                <a href="#trackers" className="text-sm text-white/60 hover:text-white">Trackers</a>
+                <a href="#perpetuals" className="text-sm text-white/60 hover:text-white">Perpetuals</a>
+                <a href="#yield" className="text-sm text-white/60 hover:text-white">Yield</a>
+                <a href="#vision" className="text-sm text-white/60 hover:text-white">Vision</a>
+                <Link to="/portfolio" className="text-sm text-white/60 hover:text-white">Portfolio</Link>
+                <a href="#rewards" className="text-sm text-white/60 hover:text-white">Rewards</a>
               </div>
             </div>
             
@@ -187,9 +148,9 @@ function LandingPage() {
               <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
                 <Star className="h-5 w-5" />
               </button>
-              <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
+              <Link to="/wallet" className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
                 <Wallet className="h-5 w-5" />
-              </button>
+              </Link>
             </div>
           </div>
         </div>
