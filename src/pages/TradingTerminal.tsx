@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeft, Rocket, Waves } from 'lucide-react';
+import { ArrowLeft, Rocket, Waves, Bell, Star, Wallet, Filter, Grid, TrendingUp, Settings, HelpCircle, BookOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { CandlestickChart } from '../components/chart/CandlestickChart';
 import { MarketList } from '../components/trading/MarketList';
+import { MemecoinTable } from '../components/trading/MemecoinTable';
 import { OrderBook } from '../components/trading/OrderBook';
 import { PerformanceMetrics } from '../components/trading/PerformanceMetrics';
 import { StrategyPanel } from '../components/trading/StrategyPanel';
@@ -146,25 +147,154 @@ function TradingTerminal() {
       </div>
 
       <div className="relative mx-auto max-w-7xl space-y-10 px-6">
-        <div className="flex flex-wrap items-center justify-between gap-6">
-          <div className="space-y-2">
-            <Link to="/" className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.35em] text-white/40">
-              <ArrowLeft className="h-4 w-4" /> Back to discover
+        {/* Top Navigation */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-8">
+            <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-accent-400">
+              <ArrowLeft className="h-4 w-4" /> Back to Discover
             </Link>
-            <h1 className="text-4xl font-semibold text-white">VolaDex Terminal</h1>
-            <p className="max-w-xl text-sm text-white/60">
-
-              Precision-engineered Solana trading workstation. Charts, liquidity, automation, portfolio health and alpha streams –
-              all elevated. Trading actions are disabled in this showcase so you can explore design and analytics freely.
-
-            </p>
+            <h1 className="text-2xl font-bold text-white">VolaDex Pro</h1>
+            <div className="hidden md:flex items-center gap-6">
+              <a href="#" className="text-sm text-white/60 hover:text-white">Pulse</a>
+              <a href="#" className="text-sm text-white/60 hover:text-white">Trackers</a>
+              <a href="#" className="text-sm text-white/60 hover:text-white">Perpetuals</a>
+              <a href="#" className="text-sm text-white/60 hover:text-white">Yield</a>
+              <a href="#" className="text-sm text-white/60 hover:text-white">Vision</a>
+              <a href="#" className="text-sm text-white/60 hover:text-white">Portfolio</a>
+              <a href="#" className="text-sm text-white/60 hover:text-white">Rewards</a>
+            </div>
           </div>
-          <div className="rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-xs uppercase tracking-[0.3em] text-white/50">
-            <p>Environment: <span className="font-semibold text-white">Simulation Mode</span></p>
-            <p>Data blend: Birdeye × Helius × Sample Streams</p>
+          
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search by token or CA..."
+                className="w-64 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-white placeholder-white/40 focus:border-accent-400 focus:outline-none"
+              />
+            </div>
+            <button className="rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 px-4 py-2 text-sm font-semibold text-black">
+              Deposit
+            </button>
+            <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
+              <Bell className="h-5 w-5" />
+            </button>
+            <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
+              <Star className="h-5 w-5" />
+            </button>
+            <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
+              <Wallet className="h-5 w-5" />
+            </button>
           </div>
         </div>
 
+        {/* Tabs and Controls */}
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-1">
+            {['Trending', 'Surge', 'DEX Screener', 'Pump Live'].map((category, index) => (
+              <button
+                key={category}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  index === 0
+                    ? 'bg-accent-400 text-black'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1">
+              {['1m', '5m', '30m', '1h'].map((timeframe, index) => (
+                <button
+                  key={timeframe}
+                  className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                    index === 1
+                      ? 'bg-white/10 text-white'
+                      : 'text-white/60 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  {timeframe}
+                </button>
+              ))}
+            </div>
+            
+            <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
+              <Filter className="h-4 w-4" />
+            </button>
+            <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
+              <Grid className="h-4 w-4" />
+            </button>
+            
+            <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2">
+              <span className="text-xs text-white/60">Quick Buy</span>
+              <input
+                type="text"
+                placeholder="0.0"
+                className="w-16 bg-transparent text-sm text-white placeholder-white/40 focus:outline-none"
+              />
+              <div className="flex gap-1">
+                <button className="rounded px-2 py-1 text-xs font-medium bg-accent-400 text-black">P1</button>
+                <button className="rounded px-2 py-1 text-xs font-medium text-white/60 hover:bg-white/10">P2</button>
+                <button className="rounded px-2 py-1 text-xs font-medium text-white/60 hover:bg-white/10">P3</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Memecoin Table */}
+        <div className="mb-8">
+          <MemecoinTable />
+        </div>
+
+        {/* Status Bar */}
+        <div className="mb-8 flex items-center justify-between rounded-2xl border border-white/10 bg-black/40 px-6 py-4">
+          <div className="flex items-center gap-6">
+            <span className="text-sm font-medium text-white">PRESET 1</span>
+            <div className="flex items-center gap-4 text-sm text-white/60">
+              <span className="flex items-center gap-2">
+                <Wallet className="h-4 w-4" />
+                Wallet
+              </span>
+              <span className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                PnL
+              </span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-sm text-white/60">
+              <span className="font-mono">$116.8K</span>
+              <span className="font-mono">$4505</span>
+              <span className="font-mono">$236.94</span>
+              <span className="font-mono">$97.4K</span>
+              <span className="font-mono">0.0184</span>
+              <span className="font-mono">0.0296</span>
+            </div>
+            <div className="flex items-center gap-2 text-green-400">
+              <div className="h-2 w-2 rounded-full bg-green-400" />
+              <span className="text-sm">Connection is stable</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-white/60">GLOBAL</span>
+            <button className="text-white/60 hover:text-white">
+              <Settings className="h-4 w-4" />
+            </button>
+            <button className="text-white/60 hover:text-white">
+              <HelpCircle className="h-4 w-4" />
+            </button>
+            <button className="text-white/60 hover:text-white">
+              <BookOpen className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Chart and Analytics Section */}
         <div className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)_340px]">
           <div className="glass-panel h-full rounded-[32px] p-6">
             <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-white/60">Markets</h2>
@@ -189,8 +319,12 @@ function TradingTerminal() {
 
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <TimeframeSelector value={interval} onChange={setInterval} />
-                <span className="rounded-full border border-white/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.3em] text-white/50">
-                  {source === 'birdeye' ? 'Live network' : 'Local demo'}
+                <span className={`rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.3em] ${
+                  source === 'birdeye' 
+                    ? 'border-green-400/30 bg-green-400/10 text-green-400' 
+                    : 'border-white/10 text-white/50'
+                }`}>
+                  {source === 'birdeye' ? 'Live Data' : 'Demo Mode'}
                 </span>
               </div>
 

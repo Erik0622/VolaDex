@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, BarChart2, Brain, Radar, ShieldCheck, Sparkles, TimerReset } from 'lucide-react';
+import { ArrowRight, Search, Star, Wallet, Bell, Filter, Grid, Zap, TrendingUp, BarChart3, Eye, Settings, HelpCircle, BookOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { GlowCard } from '../components/ui/GlowCard';
@@ -8,468 +8,418 @@ import { StatisticPill } from '../components/ui/StatisticPill';
 import { marketSummaries } from '../data/sampleMarkets';
 import { formatCompact, formatCurrency, formatPercent } from '../lib/format';
 
-const heroStats = [
-  { label: 'Execution', value: '<12ms', change: 'Latency' },
-  { label: 'Coverage', value: '420+', change: 'Markets' },
-  { label: 'Integrations', value: '35', change: 'Protocols' },
+// Memecoin data for the main table
+const memecoinData = [
+  {
+    id: 'og-og',
+    name: 'OG OG',
+    symbol: 'OG',
+    logo: '🟢',
+    age: '23m',
+    marketCap: 400000,
+    marketCapChange: -16.2,
+    liquidity: 86600,
+    volume: 335000,
+    txns: 1430,
+    buys: 737,
+    sells: 694,
+    tokenInfo: [38.81, 3.48, 802, 448],
+    chart: 'up',
+    price: 0.000123
+  },
+  {
+    id: 'grid-grid',
+    name: 'GRID GRID',
+    symbol: 'GRID',
+    logo: '⚡',
+    age: '3m',
+    marketCap: 13900,
+    marketCapChange: -61.2,
+    liquidity: 20600,
+    volume: 124000,
+    txns: 634,
+    buys: 365,
+    sells: 269,
+    tokenInfo: [45.2, 2.1, 156, 89],
+    chart: 'down',
+    price: 0.000089
+  },
+  {
+    id: 'black-blackjack',
+    name: 'black Blackjack',
+    symbol: 'B',
+    logo: '🃏',
+    age: '1d',
+    marketCap: 3930000,
+    marketCapChange: 7.272,
+    liquidity: 270000,
+    volume: 129000,
+    txns: 170,
+    buys: 76,
+    sells: 94,
+    tokenInfo: [52.1, 4.8, 234, 156],
+    chart: 'up',
+    price: 0.000456
+  },
+  {
+    id: 'ccm-criminal',
+    name: 'CCM Criminal Creato...',
+    symbol: 'CCM',
+    logo: '🔫',
+    age: '14m',
+    marketCap: 54900,
+    marketCapChange: 215.3,
+    liquidity: 40900,
+    volume: 51800,
+    txns: 357,
+    buys: 216,
+    sells: 141,
+    tokenInfo: [67.8, 1.2, 445, 123],
+    chart: 'up',
+    price: 0.000234
+  },
+  {
+    id: 'sky-sky',
+    name: 'SKY SKY',
+    symbol: 'SKY',
+    logo: '☁️',
+    age: '2d',
+    marketCap: 352000,
+    marketCapChange: 110,
+    liquidity: 77700,
+    volume: 60700,
+    txns: 270,
+    buys: 124,
+    sells: 146,
+    tokenInfo: [41.3, 5.7, 189, 234],
+    chart: 'up',
+    price: 0.000567
+  },
+  {
+    id: 'mic-pump',
+    name: 'MIC pump mic',
+    symbol: 'MIC',
+    logo: '🎤',
+    age: '6m',
+    marketCap: 18900,
+    marketCapChange: 20.93,
+    liquidity: 24100,
+    volume: 23500,
+    txns: 226,
+    buys: 106,
+    sells: 120,
+    tokenInfo: [48.9, 3.1, 167, 89],
+    chart: 'up',
+    price: 0.000345
+  }
 ];
 
-const features = [
-  {
-    title: 'Institutional-grade toolkit',
-    description: 'Cross-margined portfolio view, latency-aware routing and custom Smart Order logic shaped for serious Solana teams.',
-    icon: <ShieldCheck className="h-6 w-6" />,
-  },
-  {
-    title: 'AI-guided execution',
-    description: 'Proactive flow alerts, predictive liquidity modelling and AI generated strategy blocks to supercharge your desk.',
-    icon: <Brain className="h-6 w-6" />,
-  },
-  {
-    title: 'Global risk visibility',
-    description: 'Unified perps + spot risk across venues with scenario stress-tests streamed in real time to every stakeholder.',
-    icon: <Radar className="h-6 w-6" />,
-  },
-  {
-    title: 'Pro-grade analytics',
-    description: 'Volatility surfaces, liquidity maps and cross-chain capital flows natively embedded into the trading terminal.',
-    icon: <BarChart2 className="h-6 w-6" />,
-  },
-];
+const categories = ['Trending', 'Surge', 'DEX Screener', 'Pump Live'];
+const timeframes = ['1m', '5m', '30m', '1h'];
 
-
-const capabilityModules = [
-  {
-    title: 'Command center workspace',
-    description:
-      'Swap between macro watchlists, execution view and strategy builder instantly with synchronized context panes.',
-    metrics: [
-      { label: 'Workspace latency', value: '<8ms' },
-      { label: 'Linked canvases', value: '6' },
-      { label: 'Focus presets', value: 'Flow · Execution · Research' },
-    ],
-    tags: ['Focus mode', 'Keyboard-first', 'Adaptive grid'],
-  },
-  {
-    title: 'Intelligence mesh',
-    description:
-      'Helius flows, Birdeye depth and Pump.fun launches braided into a single AI-ranked alert stack for your desk.',
-    metrics: [
-      { label: 'Signal refresh', value: '15s cadence' },
-      { label: 'Wallet clusters', value: '120 tracked' },
-      { label: 'Sentiment scoring', value: 'Neural contextual' },
-    ],
-    tags: ['Helius fused', 'Birdeye depth', 'AI curation'],
-  },
-  {
-    title: 'Post-trade clarity',
-    description:
-      'Granular audit trails, smart reconciliations and automated reports so compliance is as elegant as the UI.',
-    metrics: [
-      { label: 'Reconciliation', value: 'Real time' },
-      { label: 'Reports generated', value: 'SOC2 ready' },
-      { label: 'Workflow automations', value: '30+ blocks' },
-    ],
-    tags: ['Audit-ready', 'Custody sync', 'Enterprise'],
-  },
-];
-
-const connectivityHighlights = [
-  {
-    title: 'Liquidity venues',
-    description: 'Phoenix, OpenBook, Meteora, Jupiter and more with adaptive routing heuristics.',
-    metric: 'Depth coverage 99.4%',
-  },
-  {
-    title: 'Risk systems',
-    description: 'Real-time VaR, delta and gamma monitors with scenario modelling piped to every workspace.',
-    metric: 'Updates every 60s',
-  },
-  {
-    title: 'Operational stack',
-    description: 'Ledger, Fireblocks, Slack, Notion and custom webhooks orchestrated through automation blocks.',
-    metric: '38 integrations',
-  },
-];
-
-const opsTimeline = [
-  {
-    phase: 'Scan',
-    description: 'AI observes mempool, social velocity and funding skew to surface emerging catalysts.',
-    status: 'Live',
-  },
-  {
-    phase: 'Decide',
-    description: 'Desk receives ranked playbooks with risk deltas, liquidity routes and automation suggestions.',
-    status: 'In-flight',
-  },
-  {
-    phase: 'Execute',
-    description: 'Smart order router simulates impact, slices orders and syncs hedges without triggering real trades here.',
-    status: 'Simulated',
-  },
-  {
-    phase: 'Review',
-    description: 'Post-trade dashboards log fills, compliance flags and alpha notes for every cycle.',
-    status: 'Logged',
-  },
-];
-
-
-function TerminalPreview() {
+function MemecoinTable() {
   return (
-    <div className="relative mx-auto max-w-3xl rounded-[36px] border border-white/10 bg-white/5 p-10 shadow-panel backdrop-blur-2xl">
-      <div className="absolute inset-x-10 top-10 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-      <div className="flex flex-col gap-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm uppercase tracking-[0.4em] text-white/60">SOL / USDC</p>
-            <p className="mt-2 text-3xl font-semibold text-white">$162.35</p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-black/60 px-4 py-3 text-xs text-white/60">
-            <p className="font-mono text-accent-400">Latency 11.2ms</p>
-            <p className="font-mono text-white/40">Route: Meteora · Phoenix</p>
-          </div>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-[2fr_1fr]">
-          <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/50 p-6">
-            <div className="flex items-center justify-between text-xs text-white/50">
-              <span className="uppercase tracking-[0.3em]">Price action</span>
-              <span className="font-mono text-accent-400">1H +5.4%</span>
-            </div>
-            <div className="mt-6 h-48 rounded-2xl bg-gradient-to-br from-primary-500/20 via-transparent to-accent-500/20">
-              <div className="relative h-full w-full">
-                <div className="absolute inset-10 rounded-2xl bg-grid-pattern bg-[length:20px_20px] opacity-40" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <svg viewBox="0 0 320 160" className="h-40 w-full text-primary-400">
-                    <path
-                      d="M0 120 C40 100 70 110 110 80 C140 60 170 30 210 40 C240 48 260 90 320 70"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M0 140 C35 130 70 136 110 110 C150 86 180 50 220 60 C260 68 280 110 320 96"
-                      fill="none"
-                      stroke="rgba(80,227,194,0.55)"
-                      strokeWidth="1.5"
-                      strokeDasharray="6 6"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <div className="rounded-3xl border border-white/10 bg-black/50 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60">Flow radar</p>
-              <div className="mt-3 space-y-3 text-sm">
-                <div className="flex items-center justify-between text-white/70">
-                  <span>Perp OI</span>
-                  <span className="font-mono text-white">$1.62B</span>
-                </div>
-                <div className="flex items-center justify-between text-white/70">
-                  <span>Spot Depth</span>
-                  <span className="font-mono text-white">$324M</span>
-                </div>
-                <div className="flex items-center justify-between text-white/70">
-                  <span>Funding Bias</span>
-                  <span className="font-mono text-accent-400">+12.4%</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-white/10 bg-black/50 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60">Automation</p>
-              <div className="mt-3 space-y-2 text-xs text-white/60">
-                <p>• Iceberg order triggered at $161.90</p>
-                <p>• Smart TWAP streaming via Phoenix</p>
-                <p>• Delta hedge rebalanced +8bps</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MarketPulse() {
-  return (
-    <div className="glass-panel rounded-[32px] border border-white/10 p-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-accent-400">Market pulse</p>
-          <p className="mt-2 text-lg font-semibold text-white">Live liquidity overview</p>
-        </div>
-        <Link to="/trade" className="text-sm font-medium text-accent-400 transition hover:text-accent-500">
-          Launch terminal →
-        </Link>
-      </div>
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        {marketSummaries.map((market) => (
-          <div key={market.symbol} className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-white">{market.name}</p>
-                <p className="text-xs uppercase tracking-[0.3em] text-white/50">{market.symbol}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-lg font-semibold text-white">{formatCurrency(market.price, { maximumFractionDigits: 3 })}</p>
-                <p className={market.change24h >= 0 ? 'text-xs font-semibold text-accent-400' : 'text-xs font-semibold text-rose-400'}>
-                  {formatPercent(market.change24h)}
-                </p>
-              </div>
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-4 text-xs text-white/60">
-              <div>
-                <p className="uppercase tracking-[0.2em]">Liquidity</p>
-                <p className="mt-1 font-mono text-sm text-white">{formatCompact(market.liquidity)}</p>
-              </div>
-              <div>
-                <p className="uppercase tracking-[0.2em]">24h Volume</p>
-                <p className="mt-1 font-mono text-sm text-white">{formatCompact(market.volume24h)}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-
-function ExperienceStack() {
-  return (
-    <section className="border-y border-white/5 py-24" id="workflow">
-      <div className="mx-auto max-w-7xl space-y-12 px-6">
-        <SectionHeader
-          eyebrow="Workflow engine"
-          title="Every trading discipline wired into one command center"
-          description="Purpose-built modules keep discovery, execution and reporting inside a single cinematic flow."
-        />
-        <div className="grid gap-6 lg:grid-cols-3">
-          {capabilityModules.map((module) => (
-            <div
-              key={module.title}
-              className="group relative overflow-hidden rounded-[32px] border border-white/10 bg-gradient-to-br from-white/10 via-black/40 to-black/80 p-8"
-            >
-              <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-              <div className="relative flex h-full flex-col gap-6">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent-300">Desk module</p>
-                  <h3 className="mt-2 text-xl font-semibold text-white">{module.title}</h3>
-                  <p className="mt-3 text-sm text-white/70">{module.description}</p>
-                </div>
-                <div className="space-y-3 text-xs">
-                  {module.metrics.map((metric) => (
-                    <div
-                      key={metric.label}
-                      className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white/60"
-                    >
-                      <span className="uppercase tracking-[0.3em]">{metric.label}</span>
-                      <span className="font-mono text-sm text-white">{metric.value}</span>
+    <div className="w-full">
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="border-b border-white/10">
+              <tr className="text-xs uppercase tracking-[0.3em] text-white/50">
+                <th className="px-6 py-4 text-left">Pair Info</th>
+                <th className="px-6 py-4 text-right">Market Cap</th>
+                <th className="px-6 py-4 text-right">Liquidity</th>
+                <th className="px-6 py-4 text-right">Volume</th>
+                <th className="px-6 py-4 text-right">TXNS</th>
+                <th className="px-6 py-4 text-right">Token Info</th>
+                <th className="px-6 py-4 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {memecoinData.map((coin, index) => (
+                <tr key={coin.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="text-2xl">{coin.logo}</div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-white">{coin.name}</span>
+                          <span className="text-xs text-white/50">{coin.age}</span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className={`w-16 h-1 rounded-full ${coin.chart === 'up' ? 'bg-green-400' : 'bg-red-400'}`} />
+                          <span className="text-xs text-white/40">{coin.symbol}</span>
+                        </div>
+                      </div>
                     </div>
-                  ))}
-                </div>
-                <div className="mt-auto flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.35em] text-white/40">
-                  {module.tags.map((tag) => (
-                    <span key={tag} className="rounded-full border border-white/10 px-3 py-1">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="glass-panel grid gap-8 rounded-[36px] border border-white/10 bg-white/5 p-8 lg:grid-cols-[1.2fr_1fr]">
-          <div className="space-y-6">
-            <h4 className="text-sm font-semibold uppercase tracking-[0.3em] text-white/60">Connectivity matrix</h4>
-            <ul className="space-y-4 text-sm text-white/70">
-              {connectivityHighlights.map((item) => (
-                <li key={item.title} className="rounded-3xl border border-white/10 bg-black/40 p-5">
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="text-base font-semibold text-white">{item.title}</p>
-                    <span className="text-xs font-mono uppercase tracking-[0.3em] text-accent-300">{item.metric}</span>
-                  </div>
-                  <p className="mt-3 text-xs text-white/50">{item.description}</p>
-                </li>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="font-mono text-sm text-white">${formatCompact(coin.marketCap)}</div>
+                    <div className={`text-xs ${coin.marketCapChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {coin.marketCapChange >= 0 ? '+' : ''}{coin.marketCapChange.toFixed(1)}%
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="font-mono text-sm text-white">${formatCompact(coin.liquidity)}</div>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="font-mono text-sm text-white">${formatCompact(coin.volume)}</div>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="font-mono text-sm text-white">{formatCompact(coin.txns)}</div>
+                    <div className="text-xs text-white/50">
+                      {coin.buys} buys / {coin.sells} sells
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="space-y-1">
+                      <div className="text-xs text-white/60">{coin.tokenInfo[0]}% {coin.tokenInfo[1]}%</div>
+                      <div className="text-xs text-white/40">{coin.tokenInfo[2]} {coin.tokenInfo[3]}</div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <button className="rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 px-4 py-2 text-xs font-semibold text-black hover:opacity-90 transition-opacity">
+                      Buy
+                    </button>
+                  </td>
+                </tr>
               ))}
-            </ul>
-          </div>
-          <div className="space-y-6">
-            <h4 className="text-sm font-semibold uppercase tracking-[0.3em] text-white/60">Operator timeline</h4>
-            <div className="relative rounded-3xl border border-white/10 bg-black/40 p-6">
-              <div className="absolute left-5 top-6 bottom-6 w-px bg-gradient-to-b from-accent-400/60 via-white/10 to-transparent" />
-              <div className="space-y-6">
-                {opsTimeline.map((step, index) => (
-                  <div key={step.phase} className="relative pl-10">
-                    <span className="absolute left-0 top-1 flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-black/80 text-[10px] font-semibold uppercase tracking-[0.3em] text-white/60">
-                      {index + 1}
-                    </span>
-                    <p className="text-sm font-semibold text-white">{step.phase}</p>
-                    <p className="mt-1 text-xs text-white/50">{step.description}</p>
-                    <span className="mt-2 inline-flex rounded-full border border-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-accent-300">
-                      {step.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+            </tbody>
+          </table>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
-
 
 function LandingPage() {
   return (
-    <div className="relative">
-      <section className="relative overflow-hidden pb-24 pt-12">
-        <div className="absolute inset-0">
-          <div className="absolute inset-x-0 top-20 mx-auto h-[400px] w-[90%] rounded-[40px] bg-gradient-to-br from-white/10 via-primary-500/10 to-transparent blur-3xl" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,107,255,0.18),_transparent_55%)]" />
-        </div>
-        <div className="relative mx-auto flex max-w-7xl flex-col items-center gap-16 px-6 lg:flex-row lg:items-start">
-          <motion.div
-            className="max-w-2xl space-y-8"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-          >
-            <StatisticPill label="NEXT-GEN SOLANA" value="INSTITUTIONAL TERMINAL" icon={<Sparkles className="h-4 w-4" />} />
-            <h1 className="text-5xl font-semibold leading-tight sm:text-6xl">
-              The Solana trading operating system built for desks that need to move <span className="text-accent-400">faster</span> than
-              the market.
-            </h1>
-            <p className="text-lg text-white/70">
-              Route liquidity across every major venue, visualize risk in real time and orchestrate automated strategies with an
-              experience that outclasses every CeFi terminal you have ever used.
-            </p>
-            <div className="flex flex-wrap items-center gap-4">
-              <Link
-                to="/trade"
-                className="group inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-primary-500 via-primary-400 to-accent-500 px-6 py-3 text-sm font-semibold text-black shadow-glow transition hover:scale-[1.02]"
-              >
-                Launch trading terminal
-                <span className="rounded-full bg-black/10 p-1 transition group-hover:translate-x-1">
-                  <ArrowRight className="h-4 w-4" />
-                </span>
-              </Link>
-              <button className="inline-flex items-center gap-3 rounded-full border border-white/10 px-6 py-3 text-sm font-semibold text-white/70 transition hover:border-white/20 hover:text-white">
-                Explore research deck
-                <TimerReset className="h-4 w-4" />
+    <div className="min-h-screen bg-background">
+      {/* Top Navigation */}
+      <nav className="border-b border-white/10 bg-black/40 backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="flex h-16 items-center justify-between">
+            <div className="flex items-center gap-8">
+              <div className="text-xl font-bold text-white">VolaDex Pro</div>
+              <div className="hidden md:flex items-center gap-6">
+                <Link to="/" className="text-sm font-medium text-accent-400">Discover</Link>
+                <a href="#" className="text-sm text-white/60 hover:text-white">Pulse</a>
+                <a href="#" className="text-sm text-white/60 hover:text-white">Trackers</a>
+                <a href="#" className="text-sm text-white/60 hover:text-white">Perpetuals</a>
+                <a href="#" className="text-sm text-white/60 hover:text-white">Yield</a>
+                <a href="#" className="text-sm text-white/60 hover:text-white">Vision</a>
+                <a href="#" className="text-sm text-white/60 hover:text-white">Portfolio</a>
+                <a href="#" className="text-sm text-white/60 hover:text-white">Rewards</a>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+                <input
+                  type="text"
+                  placeholder="Search by token or CA..."
+                  className="w-64 rounded-lg border border-white/10 bg-white/5 px-10 py-2 text-sm text-white placeholder-white/40 focus:border-accent-400 focus:outline-none"
+                />
+              </div>
+              <button className="rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 px-4 py-2 text-sm font-semibold text-black">
+                Deposit
+              </button>
+              <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
+                <Bell className="h-5 w-5" />
+              </button>
+              <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
+                <Star className="h-5 w-5" />
+              </button>
+              <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
+                <Wallet className="h-5 w-5" />
               </button>
             </div>
-            <div className="mt-8 flex flex-wrap gap-4 text-sm text-white/60">
-              {heroStats.map((stat) => (
-                <div key={stat.label} className="flex flex-col rounded-2xl border border-white/5 bg-white/5 px-5 py-4">
-                  <span className="text-xs uppercase tracking-[0.3em] text-white/50">{stat.label}</span>
-                  <span className="mt-2 text-2xl font-semibold text-white">{stat.value}</span>
-                  <span className="text-xs uppercase tracking-[0.2em] text-accent-400">{stat.change}</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          <motion.div
-            className="w-full max-w-3xl"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.2, ease: 'easeOut' }}
-          >
-            <TerminalPreview />
-          </motion.div>
+          </div>
         </div>
-      </section>
+      </nav>
 
-      <section id="analytics" className="section-gradient border-y border-white/5 py-24">
-        <div className="mx-auto flex max-w-7xl flex-col gap-12 px-6">
-          <SectionHeader
-            eyebrow="Signal engineered"
-            title="A complete execution & intelligence stack"
-            description="We rebuilt every primitive to feel cinematic. Rapid-scan liquidity heatmaps, AI risk copilots and modular automation blocks make
-              VolaDex the new benchmark for crypto-native teams."
-          />
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {features.map((feature) => (
-              <GlowCard key={feature.title} title={feature.title} description={feature.description} icon={feature.icon}>
-                <p className="mt-2 text-xs uppercase tracking-[0.25em] text-white/40">Realtime</p>
-                <p className="mt-1 text-sm text-white/70">
-                  Latency dashboards, split-second failover logic and continuous market replay ensure you never miss the move.
-                </p>
-              </GlowCard>
+      {/* Main Content */}
+      <div className="mx-auto max-w-7xl px-6 py-8">
+        {/* Tabs and Controls */}
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-1">
+            {categories.map((category, index) => (
+              <button
+                key={category}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  index === 0
+                    ? 'bg-accent-400 text-black'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                {category}
+              </button>
             ))}
           </div>
-        </div>
-      </section>
-
-
-      <ExperienceStack />
-
-
-
-      <section className="py-24" id="insights">
-        <div className="mx-auto flex max-w-7xl flex-col gap-16 px-6 lg:flex-row lg:items-center">
-          <div className="lg:w-1/2">
-            <SectionHeader
-              eyebrow="Research intelligence"
-              title="Discover catalysts before they become consensus"
-              description="Monitor social velocity, pool depth, unlock schedules and whale movement in a single adaptive dashboard."
-            />
-            <div className="mt-10 space-y-4 text-sm text-white/70">
-              <p>
-                Our discovery engine syncs with Helius, Birdeye and Pump.fun to curate what matters. Every data point is contextualized
-                with AI summaries and risk scores so you can deploy capital with conviction.
-              </p>
-              <p>
-                Trigger alerts on memecoin launches, NFT floor dislocations or perp skew – then one-click route liquidity through your
-                preferred venues, all inside VolaDex.
-              </p>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1">
+              {timeframes.map((timeframe, index) => (
+                <button
+                  key={timeframe}
+                  className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                    index === 1
+                      ? 'bg-white/10 text-white'
+                      : 'text-white/60 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  {timeframe}
+                </button>
+              ))}
             </div>
-            <div className="mt-10 flex items-center gap-4 text-xs text-white/40">
-              <span className="rounded-full border border-white/10 px-4 py-2 uppercase tracking-[0.3em]">Helius Signals</span>
-              <span className="rounded-full border border-white/10 px-4 py-2 uppercase tracking-[0.3em]">Birdeye Depth</span>
-              <span className="rounded-full border border-white/10 px-4 py-2 uppercase tracking-[0.3em]">Pump.fun Radar</span>
+            
+            <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
+              <Filter className="h-4 w-4" />
+            </button>
+            <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
+              <Grid className="h-4 w-4" />
+            </button>
+            
+            <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2">
+              <span className="text-xs text-white/60">Quick Buy</span>
+              <input
+                type="text"
+                placeholder="0.0"
+                className="w-16 bg-transparent text-sm text-white placeholder-white/40 focus:outline-none"
+              />
+              <div className="flex gap-1">
+                <button className="rounded px-2 py-1 text-xs font-medium bg-accent-400 text-black">P1</button>
+                <button className="rounded px-2 py-1 text-xs font-medium text-white/60 hover:bg-white/10">P2</button>
+                <button className="rounded px-2 py-1 text-xs font-medium text-white/60 hover:bg-white/10">P3</button>
+              </div>
             </div>
           </div>
-          <div className="lg:w-1/2">
-            <MarketPulse />
-          </div>
         </div>
-      </section>
 
-      <section className="section-gradient border-y border-white/5 py-24" id="docs">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-10 px-6 text-center">
-          <p className="text-xs uppercase tracking-[0.4em] text-accent-400">No more compromise</p>
-          <h3 className="text-4xl font-semibold">
-            Experience a trading environment where design meets execution. <span className="text-accent-400">Every pixel</span> has a job.
-          </h3>
-          <p className="max-w-3xl text-base text-white/70">
-            Deploy the VolaDex terminal within minutes. API-first architecture, granular permissioning, SOC2-ready audit trails and
-            enterprise support create a platform that scales with your ambitions.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-white/50">
-            <span className="rounded-full border border-white/10 px-5 py-2 uppercase tracking-[0.3em]">SAML / SSO</span>
-            <span className="rounded-full border border-white/10 px-5 py-2 uppercase tracking-[0.3em]">Granular Roles</span>
-            <span className="rounded-full border border-white/10 px-5 py-2 uppercase tracking-[0.3em]">99.99% SLA</span>
-            <span className="rounded-full border border-white/10 px-5 py-2 uppercase tracking-[0.3em]">24/7 Support</span>
-          </div>
-          <Link
-            to="/trade"
-            className="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-primary-500 via-primary-400 to-accent-500 px-6 py-3 text-sm font-semibold text-black shadow-glow transition hover:scale-[1.02]"
+        {/* Memecoin Table */}
+        <MemecoinTable />
+
+        {/* Hero Section */}
+        <section className="mt-24 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="space-y-8"
           >
-            Launch the experience
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+            <StatisticPill label="NEXT-GEN SOLANA" value="MEMECOIN TERMINAL" icon={<Zap className="h-4 w-4" />} />
+            <h1 className="text-5xl font-bold leading-tight sm:text-6xl">
+              The ultimate <span className="text-accent-400">memecoin</span> trading terminal for Solana
+            </h1>
+            <p className="mx-auto max-w-3xl text-lg text-white/70">
+              Track trending memecoins, analyze market data, and execute trades with institutional-grade tools. 
+              Built for the fastest and most volatile assets on Solana.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <Link
+                to="/trade"
+                className="group inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-primary-500 via-primary-400 to-accent-500 px-8 py-4 text-lg font-semibold text-black shadow-glow transition hover:scale-[1.02]"
+              >
+                Launch Trading Terminal
+                <span className="rounded-full bg-black/10 p-1 transition group-hover:translate-x-1">
+                  <ArrowRight className="h-5 w-5" />
+                </span>
+              </Link>
+              <button className="inline-flex items-center gap-3 rounded-full border border-white/10 px-8 py-4 text-lg font-semibold text-white/70 transition hover:border-white/20 hover:text-white">
+                View Documentation
+                <BookOpen className="h-5 w-5" />
+              </button>
+            </div>
+          </motion.div>
+        </section>
+
+        {/* Features Grid */}
+        <section className="mt-24">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <GlowCard
+              title="Real-time Data"
+              description="Live price feeds from Birdeye API with sub-second updates"
+              icon={<TrendingUp className="h-6 w-6" />}
+            >
+              <p className="mt-2 text-xs uppercase tracking-[0.25em] text-white/40">Live Updates</p>
+              <p className="mt-1 text-sm text-white/70">
+                Get real-time market data, volume, and liquidity information for all Solana memecoins.
+              </p>
+            </GlowCard>
+            
+            <GlowCard
+              title="Advanced Charts"
+              description="Professional candlestick charts with technical indicators"
+              icon={<BarChart3 className="h-6 w-6" />}
+            >
+              <p className="mt-2 text-xs uppercase tracking-[0.25em] text-white/40">Technical Analysis</p>
+              <p className="mt-1 text-sm text-white/70">
+                Analyze price action with institutional-grade charting tools and indicators.
+              </p>
+            </GlowCard>
+            
+            <GlowCard
+              title="Smart Alerts"
+              description="AI-powered alerts for memecoin opportunities and risks"
+              icon={<Eye className="h-6 w-6" />}
+            >
+              <p className="mt-2 text-xs uppercase tracking-[0.25em] text-white/40">AI Detection</p>
+              <p className="mt-1 text-sm text-white/70">
+                Never miss a pump with intelligent alerts and trend detection algorithms.
+              </p>
+            </GlowCard>
+          </div>
+        </section>
+      </div>
+
+      {/* Bottom Status Bar */}
+      <div className="fixed bottom-0 left-0 right-0 border-t border-white/10 bg-black/80 backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-6 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              <span className="text-sm font-medium text-white">PRESET 1</span>
+              <div className="flex items-center gap-4 text-sm text-white/60">
+                <span className="flex items-center gap-2">
+                  <Wallet className="h-4 w-4" />
+                  Wallet
+                </span>
+                <span className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  PnL
+                </span>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-sm text-white/60">
+                <span className="font-mono">$116.8K</span>
+                <span className="font-mono">$4505</span>
+                <span className="font-mono">$236.94</span>
+                <span className="font-mono">$97.4K</span>
+                <span className="font-mono">0.0184</span>
+                <span className="font-mono">0.0296</span>
+              </div>
+              <div className="flex items-center gap-2 text-green-400">
+                <div className="h-2 w-2 rounded-full bg-green-400" />
+                <span className="text-sm">Connection is stable</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-white/60">GLOBAL</span>
+              <button className="text-white/60 hover:text-white">
+                <Settings className="h-4 w-4" />
+              </button>
+              <button className="text-white/60 hover:text-white">
+                <HelpCircle className="h-4 w-4" />
+              </button>
+              <button className="text-white/60 hover:text-white">
+                <BookOpen className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

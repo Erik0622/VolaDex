@@ -20,45 +20,73 @@ interface PriceDataResult {
 
 async function fetchBirdeyeCandles(address: string, interval: string): Promise<CandleDatum[]> {
   if (!env.birdeyeApiKey) {
+    console.warn('Missing Birdeye API key, falling back to sample data');
     throw new Error('Missing Birdeye API key');
   }
 
+  console.log('Fetching Birdeye data for:', { address, interval, apiKey: env.birdeyeApiKey.substring(0, 8) + '...' });
+
   const now = Math.floor(Date.now() / 1000);
   const timeFrom = now - 60 * 60 * 24; // 24h
-  const url = new URL('https://public-api.birdeye.so/public/price_history');
-  url.searchParams.set('address', address);
-  url.searchParams.set('interval', interval);
-  url.searchParams.set('time_from', String(timeFrom));
-  url.searchParams.set('time_to', String(now));
+  
+  // Try multiple Birdeye API endpoints
+  const endpoints = [
+    'https://public-api.birdeye.so/public/v1/token/price_history',
+    'https://public-api.birdeye.so/public/price_history',
+    'https://api.birdeye.so/v1/token/price_history'
+  ];
 
-  const response = await fetch(url.toString(), {
-    headers: {
-      accept: 'application/json',
-      'X-API-KEY': env.birdeyeApiKey,
-    },
-  });
+  for (const endpoint of endpoints) {
+    try {
+      const url = new URL(endpoint);
+      url.searchParams.set('address', address);
+      url.searchParams.set('type', interval);
+      url.searchParams.set('time_from', String(timeFrom));
+      url.searchParams.set('time_to', String(now));
 
-  if (!response.ok) {
-    throw new Error(`Birdeye request failed: ${response.status}`);
+      console.log('Trying Birdeye API URL:', url.toString());
+
+      const response = await fetch(url.toString(), {
+        headers: {
+          'accept': 'application/json',
+          'X-API-KEY': env.birdeyeApiKey,
+        },
+      });
+
+      console.log('Birdeye response status:', response.status);
+
+      if (response.ok) {
+        const json = await response.json();
+        console.log('Birdeye API response:', json);
+
+        const rawItems =
+          json?.data?.items ??
+          json?.data?.priceHistory ??
+          json?.data ??
+          json?.items ??
+          [];
+
+        if (Array.isArray(rawItems) && rawItems.length > 0) {
+          console.log('Successfully fetched Birdeye data:', rawItems.length, 'items');
+          return mapBirdeyeData(rawItems);
+        }
+      } else {
+        const errorText = await response.text();
+        console.warn(`Birdeye API error (${endpoint}):`, response.status, errorText);
+      }
+    } catch (error) {
+      console.warn(`Birdeye API error (${endpoint}):`, error);
+    }
   }
 
-  const json = await response.json();
-  const rawItems =
-    json?.data?.items ??
-    json?.data?.priceHistory ??
-    json?.data ??
-    json?.items ??
-    [];
+  console.warn('All Birdeye API endpoints failed, falling back to sample data');
+  throw new Error('All Birdeye API endpoints failed');
+}
 
-  if (!Array.isArray(rawItems) || rawItems.length === 0) {
-    throw new Error('Empty Birdeye payload');
-  }
-
+function mapBirdeyeData(rawItems: any[]): CandleDatum[] {
   const mapped: CandleDatum[] = rawItems
     .map((item: any) => {
-
       const rawTime = Number(item?.unixTime ?? item?.time ?? item?.timestamp ?? 0);
-
       const open = Number(item?.open ?? item?.o ?? item?.priceOpen ?? item?.startPrice ?? item?.value ?? 0);
       const high = Number(item?.high ?? item?.h ?? item?.priceHigh ?? item?.max ?? open);
       const low = Number(item?.low ?? item?.l ?? item?.priceLow ?? item?.min ?? open);
@@ -71,7 +99,6 @@ async function fetchBirdeyeCandles(address: string, interval: string): Promise<C
 
       return {
         time: normalizedTime,
-
         open,
         high,
         low,
@@ -79,9 +106,7 @@ async function fetchBirdeyeCandles(address: string, interval: string): Promise<C
         volume,
       } satisfies CandleDatum;
     })
-
     .filter((item): item is CandleDatum => Boolean(item));
-
 
   if (!mapped.length) {
     throw new Error('Unable to map Birdeye candles');
@@ -95,10 +120,23 @@ export function usePriceData({ address, interval = '5m' }: UsePriceDataOptions):
     queryKey: ['price', address, interval],
     queryFn: () => fetchBirdeyeCandles(address, interval),
     enabled: Boolean(address && env.birdeyeApiKey),
+    retry: 2,
+    retryDelay: 1000,
+    staleTime: 30000, // 30 seconds
   });
 
   return useMemo(() => {
-    if (query.isSuccess && query.data.length > 0) {
+    // Debug logging
+    console.log('usePriceData debug:', {
+      hasApiKey: !!env.birdeyeApiKey,
+      apiKeyLength: env.birdeyeApiKey?.length || 0,
+      queryStatus: query.status,
+      queryError: query.error,
+      dataLength: query.data?.length || 0,
+      address,
+    });
+
+    if (query.isSuccess && query.data && query.data.length > 0) {
       return {
         source: 'birdeye' as const,
         candles: query.data,
@@ -109,5 +147,5 @@ export function usePriceData({ address, interval = '5m' }: UsePriceDataOptions):
       source: 'sample' as const,
       candles: sampleCandles,
     };
-  }, [query.data, query.isSuccess]);
+  }, [query.data, query.isSuccess, query.status, query.error, address]);
 }
