@@ -29,18 +29,18 @@ async function fetchBirdeyeCandles(address: string, interval: string): Promise<C
   const now = Math.floor(Date.now() / 1000);
   const timeFrom = now - 60 * 60 * 24; // 24h
   
-  // Try multiple Birdeye API endpoints
+  // Use the correct Birdeye API endpoint for OHLCV data
   const endpoints = [
+    'https://api.birdeye.so/defi/ohlcv',
     'https://public-api.birdeye.so/public/v1/token/price_history',
-    'https://public-api.birdeye.so/public/price_history',
-    'https://api.birdeye.so/v1/token/price_history'
+    'https://public-api.birdeye.so/public/price_history'
   ];
 
   for (const endpoint of endpoints) {
     try {
       const url = new URL(endpoint);
       url.searchParams.set('address', address);
-      url.searchParams.set('type', interval);
+      url.searchParams.set('interval', interval);
       url.searchParams.set('time_from', String(timeFrom));
       url.searchParams.set('time_to', String(now));
 
@@ -49,6 +49,7 @@ async function fetchBirdeyeCandles(address: string, interval: string): Promise<C
       const response = await fetch(url.toString(), {
         headers: {
           'accept': 'application/json',
+          'Authorization': `Bearer ${env.birdeyeApiKey}`,
           'X-API-KEY': env.birdeyeApiKey,
         },
       });

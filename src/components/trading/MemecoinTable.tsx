@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface MemecoinData {
   id: string;
@@ -136,6 +137,13 @@ function formatCompact(num: number): string {
 
 export function MemecoinTable() {
   const [selectedCoin, setSelectedCoin] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const handleCoinClick = (coin: MemecoinData) => {
+    setSelectedCoin(coin.id);
+    // Navigate to trading terminal with selected coin
+    navigate(`/trade?coin=${coin.symbol}&address=${coin.id}`);
+  };
 
   return (
     <div className="w-full">
@@ -160,7 +168,7 @@ export function MemecoinTable() {
                   className={`border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer ${
                     selectedCoin === coin.id ? 'bg-accent-400/10' : ''
                   }`}
-                  onClick={() => setSelectedCoin(coin.id)}
+                  onClick={() => handleCoinClick(coin)}
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
