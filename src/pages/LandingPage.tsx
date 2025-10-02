@@ -46,8 +46,8 @@ function MemecoinInsights() {
   const navigate = Link;
 
   const handleCoinClick = (coin: any) => {
-    // Navigate to trading terminal with the selected coin
-    window.location.href = `/trade?address=${coin.address}&symbol=${coin.symbol}`;
+    // Navigate to chart page with the selected coin
+    window.location.href = `/chart?address=${coin.address}&symbol=${coin.symbol}&name=${encodeURIComponent(coin.name)}`;
   };
 
   if (isLoading) {

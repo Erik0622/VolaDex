@@ -1,238 +1,135 @@
 import { useState } from 'react';
-import { TrendingUp, TrendingDown, Coins, Zap, Flame, Sparkles, Star, CircleDollarSign } from 'lucide-react';
+import { TrendingUp, TrendingDown, Flame } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTrendingMemecoins } from '../../hooks/useTrending';
+import { formatCompact } from '../../lib/format';
 
-interface MemecoinData {
-  id: string;
-  name: string;
-  symbol: string;
-  iconType: 'coins' | 'zap' | 'flame' | 'sparkles' | 'star' | 'dollar';
-  age: string;
-  marketCap: number;
-  marketCapChange: number;
-  liquidity: number;
-  volume: number;
-  txns: number;
-  buys: number;
-  sells: number;
-  tokenInfo: number[];
-  chart: 'up' | 'down';
-  price: number;
-}
-
-const iconMap = {
-  coins: Coins,
-  zap: Zap,
-  flame: Flame,
-  sparkles: Sparkles,
-  star: Star,
-  dollar: CircleDollarSign,
-};
-
-const memecoinData: MemecoinData[] = [
-  {
-    id: 'og-og',
-    name: 'OG OG',
-    symbol: 'OG',
-    iconType: 'coins',
-    age: '23m',
-    marketCap: 400000,
-    marketCapChange: -16.2,
-    liquidity: 86600,
-    volume: 335000,
-    txns: 1430,
-    buys: 737,
-    sells: 694,
-    tokenInfo: [38.81, 3.48, 802, 448],
-    chart: 'up',
-    price: 0.000123
-  },
-  {
-    id: 'grid-grid',
-    name: 'GRID GRID',
-    symbol: 'GRID',
-    iconType: 'zap',
-    age: '3m',
-    marketCap: 13900,
-    marketCapChange: -61.2,
-    liquidity: 20600,
-    volume: 124000,
-    txns: 634,
-    buys: 365,
-    sells: 269,
-    tokenInfo: [45.2, 2.1, 156, 89],
-    chart: 'down',
-    price: 0.000089
-  },
-  {
-    id: 'black-blackjack',
-    name: 'black Blackjack',
-    symbol: 'B',
-    iconType: 'star',
-    age: '1d',
-    marketCap: 3930000,
-    marketCapChange: 7.272,
-    liquidity: 270000,
-    volume: 129000,
-    txns: 170,
-    buys: 76,
-    sells: 94,
-    tokenInfo: [52.1, 4.8, 234, 156],
-    chart: 'up',
-    price: 0.000456
-  },
-  {
-    id: 'ccm-criminal',
-    name: 'CCM Criminal Creato...',
-    symbol: 'CCM',
-    iconType: 'flame',
-    age: '14m',
-    marketCap: 54900,
-    marketCapChange: 215.3,
-    liquidity: 40900,
-    volume: 51800,
-    txns: 357,
-    buys: 216,
-    sells: 141,
-    tokenInfo: [67.8, 1.2, 445, 123],
-    chart: 'up',
-    price: 0.000234
-  },
-  {
-    id: 'sky-sky',
-    name: 'SKY SKY',
-    symbol: 'SKY',
-    iconType: 'sparkles',
-    age: '2d',
-    marketCap: 352000,
-    marketCapChange: 110,
-    liquidity: 77700,
-    volume: 60700,
-    txns: 270,
-    buys: 124,
-    sells: 146,
-    tokenInfo: [41.3, 5.7, 189, 234],
-    chart: 'up',
-    price: 0.000567
-  },
-  {
-    id: 'mic-pump',
-    name: 'MIC pump mic',
-    symbol: 'MIC',
-    iconType: 'dollar',
-    age: '6m',
-    marketCap: 18900,
-    marketCapChange: 20.93,
-    liquidity: 24100,
-    volume: 23500,
-    txns: 226,
-    buys: 106,
-    sells: 120,
-    tokenInfo: [48.9, 3.1, 167, 89],
-    chart: 'up',
-    price: 0.000345
-  }
-];
-
-function formatCompact(num: number): string {
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1) + 'M';
-  }
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'K';
-  }
-  return num.toString();
-}
 
 export function MemecoinTable() {
   const [selectedCoin, setSelectedCoin] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { data: trending, isLoading } = useTrendingMemecoins();
 
-  const handleCoinClick = (coin: MemecoinData) => {
-    setSelectedCoin(coin.id);
-    // Navigate to trading terminal with selected coin
-    navigate(`/trade?coin=${coin.symbol}&address=${coin.id}`);
+  const handleCoinClick = (coin: any) => {
+    setSelectedCoin(coin.address);
+    // Navigate to chart page with selected coin
+    navigate(`/chart?address=${coin.address}&symbol=${coin.symbol}&name=${encodeURIComponent(coin.name)}`);
   };
+
+  if (isLoading) {
+    return (
+      <div className="w-full">
+        <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/40 p-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-400 mx-auto mb-4"></div>
+            <p className="text-white/60">Loading trending tokens...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!trending || trending.length === 0) {
+    return (
+      <div className="w-full">
+        <div className="overflow-hidden rounded-2xl border border-yellow-500/20 bg-yellow-500/10 p-6">
+          <p className="text-sm text-yellow-500">
+            Unable to load trending tokens. Please check your API configuration.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-white">Trending Tokens</h3>
+        <span className="text-xs text-green-400">🟢 Live Data from Birdeye</span>
+      </div>
+      
       <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/40">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="border-b border-white/10">
               <tr className="text-xs uppercase tracking-[0.3em] text-white/50">
-                <th className="px-6 py-4 text-left">Pair Info</th>
+                <th className="px-6 py-4 text-left">Token</th>
+                <th className="px-6 py-4 text-right">Price</th>
+                <th className="px-6 py-4 text-right">24h Change</th>
+                <th className="px-6 py-4 text-right">Volume 24h</th>
                 <th className="px-6 py-4 text-right">Market Cap</th>
-                <th className="px-6 py-4 text-right">Liquidity</th>
-                <th className="px-6 py-4 text-right">Volume</th>
-                <th className="px-6 py-4 text-right">TXNS</th>
-                <th className="px-6 py-4 text-right">Token Info</th>
                 <th className="px-6 py-4 text-center">Action</th>
               </tr>
             </thead>
             <tbody>
-              {memecoinData.map((coin) => (
+              {trending.slice(0, 20).map((coin) => (
                 <tr 
-                  key={coin.id} 
+                  key={coin.address} 
                   className={`border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer ${
-                    selectedCoin === coin.id ? 'bg-accent-400/10' : ''
+                    selectedCoin === coin.address ? 'bg-accent-400/10' : ''
                   }`}
                   onClick={() => handleCoinClick(coin)}
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-accent-500">
-                        {(() => {
-                          const Icon = iconMap[coin.iconType];
-                          return <Icon className="h-5 w-5 text-white" />;
-                        })()}
+                      {coin.logoURI ? (
+                        <img 
+                          src={coin.logoURI} 
+                          alt={coin.symbol}
+                          className="h-10 w-10 rounded-full"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-accent-500 ${coin.logoURI ? 'hidden' : ''}`}>
+                        <Flame className="h-5 w-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-white truncate">{coin.name}</span>
-                          <span className="text-xs text-white/50 flex-shrink-0">{coin.age}</span>
-                        </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className={`w-16 h-1 rounded-full ${coin.chart === 'up' ? 'bg-green-400' : 'bg-red-400'}`} />
-                          <span className="text-xs text-white/40">{coin.symbol}</span>
-                        </div>
+                        <div className="font-semibold text-white truncate">{coin.name}</div>
+                        <div className="text-xs text-white/50">{coin.symbol}</div>
                       </div>
                     </div>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="font-mono text-sm text-white">
+                      ${coin.price < 0.01 ? coin.price.toExponential(2) : coin.price.toFixed(4)}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    {coin.change24h !== null ? (
+                      <div className={`flex items-center justify-end gap-1 ${
+                        coin.change24h >= 0 ? 'text-green-400' : 'text-red-400'
+                      }`}>
+                        {coin.change24h >= 0 ? (
+                          <TrendingUp className="h-3 w-3" />
+                        ) : (
+                          <TrendingDown className="h-3 w-3" />
+                        )}
+                        <span className="text-sm font-semibold">
+                          {coin.change24h >= 0 ? '+' : ''}{coin.change24h.toFixed(2)}%
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-white/40">—</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="font-mono text-sm text-white">${formatCompact(coin.volume24h)}</div>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="font-mono text-sm text-white">${formatCompact(coin.marketCap)}</div>
-                    <div className={`text-xs flex items-center justify-end gap-1 ${
-                      coin.marketCapChange >= 0 ? 'text-green-400' : 'text-red-400'
-                    }`}>
-                      {coin.marketCapChange >= 0 ? (
-                        <TrendingUp className="h-3 w-3" />
-                      ) : (
-                        <TrendingDown className="h-3 w-3" />
-                      )}
-                      {coin.marketCapChange >= 0 ? '+' : ''}{coin.marketCapChange.toFixed(1)}%
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="font-mono text-sm text-white">${formatCompact(coin.liquidity)}</div>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="font-mono text-sm text-white">${formatCompact(coin.volume)}</div>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="font-mono text-sm text-white">{formatCompact(coin.txns)}</div>
-                    <div className="text-xs text-white/50">
-                      {coin.buys} buys / {coin.sells} sells
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="space-y-1">
-                      <div className="text-xs text-white/60">{coin.tokenInfo[0]}% {coin.tokenInfo[1]}%</div>
-                      <div className="text-xs text-white/40">{coin.tokenInfo[2]} {coin.tokenInfo[3]}</div>
-                    </div>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <button className="rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 px-4 py-2 text-xs font-semibold text-black hover:opacity-90 transition-opacity">
-                      Buy
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCoinClick(coin);
+                      }}
+                      className="rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 px-4 py-2 text-xs font-semibold text-black hover:opacity-90 transition-opacity"
+                    >
+                      View Chart
                     </button>
                   </td>
                 </tr>
