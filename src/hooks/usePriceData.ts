@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { sampleCandles } from '../data/sampleCandles';
 import type { CandleDatum } from '../types/trading';
 import { env, validateApiKeys, getSecurityWarning } from '../lib/env';
-import { fetchBirdeyeViaProxy } from '../lib/api-proxy';
+import { fetchOHLCVData, type BirdeyeOHLCVParams } from '../lib/birdeye-service';
 
 interface UsePriceDataOptions {
   address: string;
@@ -19,9 +19,9 @@ interface PriceDataResult {
   candles: CandleDatum[];
 }
 
-async function fetchBirdeyeCandles(address: string, type: string): Promise<CandleDatum[]> {
+async function fetchBirdeyeCandles(address: string, type: '1m' | '5m' | '15m' | '1h' | '4h' | '1d'): Promise<CandleDatum[]> {
   // Validierung und Sicherheitshinweis
-  const apiStatus = validateApiKeys();
+  validateApiKeys();
   getSecurityWarning();
 
   if (!env.birdeyeApiKey) {
@@ -29,77 +29,28 @@ async function fetchBirdeyeCandles(address: string, type: string): Promise<Candl
     throw new Error('Missing Birdeye API key');
   }
 
-  console.log('Fetching Birdeye data for:', { address, type, apiKey: env.birdeyeApiKey.substring(0, 8) + '...' });
-
-  const now = Math.floor(Date.now() / 1000);
-  const timeFrom = now - 60 * 60 * 24; // 24h
+  console.log('🔄 Fetching Birdeye price history for:', { 
+    address, 
+    type, 
+    apiKey: env.birdeyeApiKey.substring(0, 8) + '...' 
+  });
 
   try {
-    // Versuche zuerst den Proxy (CORS-frei)
-    const proxyData = await fetchBirdeyeViaProxy({
+    const response = await fetchOHLCVData({
       address,
       type,
-      time_from: timeFrom,
-      time_to: now,
-      chain: 'solana'
     });
 
-    const rawItems = proxyData?.data?.items ?? proxyData?.data ?? proxyData?.items ?? [];
-
-    if (Array.isArray(rawItems) && rawItems.length > 0) {
-      console.log('Successfully fetched Birdeye data via proxy:', rawItems.length, 'items');
-      return mapBirdeyeData(rawItems);
-    }
-  } catch (proxyError) {
-    console.warn('Proxy failed, trying direct API call:', proxyError);
-  }
-
-  // Fallback: Direkte API mit verbesserter Fehlerbehandlung
-  const url = new URL('https://public-api.birdeye.so/defi/ohlcv');
-  url.searchParams.set('address', address);
-  url.searchParams.set('type', type);
-  url.searchParams.set('time_from', String(timeFrom));
-  url.searchParams.set('time_to', String(now));
-
-  console.log('Trying direct Birdeye API URL:', url.toString());
-
-  try {
-    const response = await fetch(url.toString(), {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        'accept': 'application/json',
-        'X-API-KEY': env.birdeyeApiKey,
-        'x-chain': 'solana',
-      },
-    });
-
-    console.log('Birdeye response status:', response.status);
-
-    if (!response.ok) {
-      let errorDetails = '';
-      try {
-        const errorJson = await response.json();
-        errorDetails = JSON.stringify(errorJson);
-      } catch {
-        errorDetails = await response.text();
-      }
-      throw new Error(`Birdeye ${response.status}: ${errorDetails}`);
-    }
-
-    const json = await response.json();
-    console.log('Birdeye API response:', json);
-
-    const rawItems = json?.data?.items ?? json?.data ?? json?.items ?? [];
-
-    if (Array.isArray(rawItems) && rawItems.length > 0) {
-      console.log('Successfully fetched Birdeye data:', rawItems.length, 'items');
-      return mapBirdeyeData(rawItems);
-    } else {
+    if (!response.success || !response.data?.items || response.data.items.length === 0) {
+      console.warn('No data returned from Birdeye API');
       throw new Error('No data items found in Birdeye response');
     }
+
+    const candles = mapBirdeyeData(response.data.items);
+    console.log('✅ Successfully fetched Birdeye data:', candles.length, 'candles');
+    return candles;
   } catch (error) {
-    console.warn('All Birdeye API methods failed:', error);
+    console.error('❌ Failed to fetch Birdeye data:', error);
     throw error;
   }
 }
@@ -107,16 +58,19 @@ async function fetchBirdeyeCandles(address: string, type: string): Promise<Candl
 function mapBirdeyeData(rawItems: any[]): CandleDatum[] {
   const mapped: CandleDatum[] = rawItems
     .map((item: any) => {
-      const rawTime = Number(item?.unixTime ?? item?.time ?? item?.timestamp ?? 0);
-      const open = Number(item?.open ?? item?.o ?? item?.priceOpen ?? item?.startPrice ?? item?.value ?? 0);
-      const high = Number(item?.high ?? item?.h ?? item?.priceHigh ?? item?.max ?? open);
-      const low = Number(item?.low ?? item?.l ?? item?.priceLow ?? item?.min ?? open);
-      const close = Number(item?.close ?? item?.c ?? item?.priceClose ?? item?.endPrice ?? item?.value ?? open);
-      const volume = Number(item?.volume ?? item?.v ?? item?.baseVolume ?? item?.quoteVolume ?? 0);
+      // BirdeyeCandleData from our service already has the right format
+      const rawTime = Number(item?.time ?? 0);
+      const open = Number(item?.open ?? 0);
+      const high = Number(item?.high ?? open);
+      const low = Number(item?.low ?? open);
+      const close = Number(item?.close ?? open);
+      const volume = Number(item?.volume ?? 0);
 
       if (!Number.isFinite(rawTime) || rawTime <= 0) return null;
+      if (!Number.isFinite(open) || !Number.isFinite(high) || !Number.isFinite(low) || !Number.isFinite(close)) return null;
 
-      const normalizedTime = (rawTime > 1e12 ? Math.floor(rawTime / 1000) : Math.floor(rawTime)) as UTCTimestamp;
+      // Time is already in seconds from our service
+      const normalizedTime = rawTime as UTCTimestamp;
 
       return {
         time: normalizedTime,
@@ -130,7 +84,7 @@ function mapBirdeyeData(rawItems: any[]): CandleDatum[] {
     .filter((item): item is CandleDatum => Boolean(item));
 
   if (!mapped.length) {
-    throw new Error('Unable to map Birdeye candles');
+    throw new Error('Unable to map Birdeye candles - no valid data');
   }
 
   return mapped;
