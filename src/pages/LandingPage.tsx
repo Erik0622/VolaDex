@@ -42,28 +42,83 @@ const features = [
 const categories = ['Trending', 'Surge', 'DEX Screener', 'Pump Live'];
 
 function MemecoinInsights() {
-  const { data: trending, isSuccess, isLoading } = useTrendingMemecoins();
+  const { data: trending, isSuccess, isLoading, isError } = useTrendingMemecoins();
+  const navigate = Link;
+
+  const handleCoinClick = (coin: any) => {
+    // Navigate to trading terminal with the selected coin
+    window.location.href = `/trade?address=${coin.address}&symbol=${coin.symbol}`;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="w-full">
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-white">Trending Memecoins</h3>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="rounded-2xl border border-white/10 bg-black/40 p-4 animate-pulse">
+              <div className="h-10 w-10 rounded-full bg-white/10 mb-3" />
+              <div className="space-y-2">
+                <div className="h-4 bg-white/10 rounded w-3/4" />
+                <div className="h-3 bg-white/10 rounded w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !trending || trending.length === 0) {
+    return (
+      <div className="w-full">
+        <div className="rounded-2xl border border-yellow-500/20 bg-yellow-500/10 p-6">
+          <p className="text-sm text-yellow-500">
+            Unable to load trending tokens. Please check your API key configuration.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full">
       <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h3 className="text-lg font-semibold text-white">Trending Memecoins</h3>
+        <div>
+          <h3 className="text-lg font-semibold text-white">Trending Memecoins</h3>
+          <p className="text-xs text-white/50 mt-1">✅ Live data from Birdeye API</p>
+        </div>
         <Link to="/trade" className="text-sm text-accent-400 hover:text-accent-300 flex items-center gap-2">
           View All <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
       
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {(trending ?? []).slice(0, 8).map((coin, index) => (
+        {trending.slice(0, 8).map((coin, index) => (
           <motion.div
-            key={coin.symbol}
+            key={coin.address}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: index * 0.05 }}
             whileHover={{ scale: 1.02 }}
-            className="rounded-2xl border border-white/10 bg-black/40 p-4 hover:bg-white/5 transition-colors cursor-pointer"
+            onClick={() => handleCoinClick(coin)}
+            className="rounded-2xl border border-white/10 bg-black/40 p-4 hover:bg-white/5 hover:border-accent-400/30 transition-all cursor-pointer"
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-accent-500">
+              {coin.logoURI ? (
+                <img 
+                  src={coin.logoURI} 
+                  alt={coin.symbol}
+                  className="h-10 w-10 rounded-full"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+              ) : null}
+              <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-accent-500 ${coin.logoURI ? 'hidden' : ''}`}>
                 <Flame className="h-5 w-5 text-white" />
               </div>
               <div className="flex-1 min-w-0">
@@ -74,17 +129,21 @@ function MemecoinInsights() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-white/60">Price</span>
-                <span className="font-mono text-sm text-white">{coin.price ? `$${Number(coin.price).toLocaleString()}` : '—'}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-white/60">24h Change</span>
-                <span className={`text-sm font-semibold ${Number(coin.change24h) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {Number(coin.change24h) >= 0 ? '+' : ''}{Number(coin.change24h).toFixed(2)}%
+                <span className="font-mono text-sm text-white">
+                  ${coin.price < 0.01 ? coin.price.toExponential(2) : coin.price.toFixed(4)}
                 </span>
               </div>
+              {coin.change24h !== null && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-white/60">24h</span>
+                  <span className={`text-sm font-semibold ${coin.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {coin.change24h >= 0 ? '+' : ''}{coin.change24h.toFixed(2)}%
+                  </span>
+                </div>
+              )}
               <div className="flex items-center justify-between">
-                <span className="text-sm text-white/60">Volume</span>
-                <span className="font-mono text-xs text-white/70">${formatCompact(Number(coin.volume24h))}</span>
+                <span className="text-sm text-white/60">Vol</span>
+                <span className="font-mono text-xs text-white/70">${formatCompact(coin.volume24h)}</span>
               </div>
             </div>
           </motion.div>

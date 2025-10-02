@@ -14,36 +14,43 @@ import { formatPercent } from '../lib/format';
 function TradingTerminal() {
   const [searchParams] = useSearchParams();
   const [selectedMarket, setSelectedMarket] = useState(tokenMarkets[0]);
-  const [interval, setInterval] = useState<'1m' | '5m' | '15m' | '1h' | '4h' | '1d'>('5m');
+  const [interval, setInterval] = useState<'1m' | '5m' | '15m' | '1h' | '4h' | '1d'>('15m');
   const [searchQuery, setSearchQuery] = useState('');
-  const [contractAddress, setContractAddress] = useState('');
   const { candles, source } = usePriceData({ address: selectedMarket.address, interval });
 
-  // Handle URL parameters for selected coin or search
+  // Handle URL parameters for selected coin
   useEffect(() => {
-    const coinParam = searchParams.get('coin');
     const addressParam = searchParams.get('address');
+    const symbolParam = searchParams.get('symbol');
     const searchParam = searchParams.get('search');
     
-    if (searchParam) {
-      setSearchQuery(searchParam);
-      // If search looks like a Solana address, use it
-      if (searchParam.length >= 32 && searchParam.length <= 44) {
-        setContractAddress(searchParam);
-        // Try to find or load the token
-        const market = tokenMarkets.find(m => m.address === searchParam);
-        if (market) {
-          setSelectedMarket(market);
-        }
+    if (addressParam) {
+      // Check if it exists in our market list
+      const existingMarket = tokenMarkets.find(m => m.address === addressParam);
+      
+      if (existingMarket) {
+        console.log('Found existing market:', existingMarket);
+        setSelectedMarket(existingMarket);
+      } else {
+        // Create a new market entry for this token
+        console.log('Creating new market for address:', addressParam);
+        const newMarket = {
+          id: addressParam,
+          name: symbolParam || 'Unknown Token',
+          symbol: symbolParam || '???',
+          address: addressParam,
+          price: 0,
+          change24h: 0,
+          volume24h: 0,
+          marketCap: 0,
+          liquidity: 0,
+        };
+        setSelectedMarket(newMarket);
       }
     }
     
-    if (coinParam && addressParam) {
-      // Find the market by symbol or create a new one
-      const market = tokenMarkets.find(m => m.symbol === coinParam);
-      if (market) {
-        setSelectedMarket(market);
-      }
+    if (searchParam) {
+      setSearchQuery(searchParam);
     }
   }, [searchParams]);
 
@@ -52,24 +59,16 @@ function TradingTerminal() {
     if (searchQuery.trim()) {
       // Check if it's a contract address (Solana addresses are typically 32-44 chars)
       if (searchQuery.length >= 32 && searchQuery.length <= 44) {
-        setContractAddress(searchQuery);
-        // Try to find the token in our markets
-        const market = tokenMarkets.find(m => 
-          m.address.toLowerCase() === searchQuery.toLowerCase() ||
-          m.symbol.toLowerCase() === searchQuery.toLowerCase() ||
-          m.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        if (market) {
-          setSelectedMarket(market);
-        }
+        // Reload page with the new address
+        window.location.href = `/trade?address=${searchQuery}`;
       } else {
-        // Search by name or symbol
+        // Search by name or symbol in existing markets
         const market = tokenMarkets.find(m => 
           m.symbol.toLowerCase() === searchQuery.toLowerCase() ||
           m.name.toLowerCase().includes(searchQuery.toLowerCase())
         );
         if (market) {
-          setSelectedMarket(market);
+          window.location.href = `/trade?address=${market.address}&symbol=${market.symbol}`;
         }
       }
     }

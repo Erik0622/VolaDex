@@ -1,4 +1,4 @@
-// Birdeye API Service with proper error handling and API key usage
+// Birdeye API Service - Using working endpoints only
 import { env } from './env';
 
 export interface BirdeyeOHLCVParams {
@@ -8,19 +8,25 @@ export interface BirdeyeOHLCVParams {
   time_to?: number;
 }
 
-export interface BirdeyeOHLCVItem {
-  unixTime: number;
-  o: number;  // open
-  h: number;  // high
-  l: number;  // low
-  c: number;  // close
-  v: number;  // volume
+export interface BirdeyeCandleData {
+  time: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
 }
 
-export interface BirdeyeOHLCVResponse {
+export interface BirdeyePriceHistoryItem {
+  unixTime: number;
+  value: number;
+  type?: string;
+}
+
+export interface BirdeyePriceHistoryResponse {
   success: boolean;
   data: {
-    items: BirdeyeOHLCVItem[];
+    items: BirdeyePriceHistoryItem[];
   };
 }
 
@@ -31,15 +37,17 @@ export interface BirdeyeTokenInfo {
   decimals: number;
   liquidity: number;
   price: number;
-  priceChange24h: number;
+  priceChange24h: number | null;
   volume24h: number;
   marketCap: number;
+  logoURI?: string;
 }
 
 /**
- * Fetch OHLCV (candlestick) data from Birdeye API
+ * Fetch price history and convert to OHLCV candlestick data
+ * This endpoint works with our API key!
  */
-export async function fetchOHLCVData(params: BirdeyeOHLCVParams): Promise<BirdeyeOHLCVResponse> {
+export async function fetchOHLCVData(params: BirdeyeOHLCVParams): Promise<{ success: boolean; data: { items: BirdeyeCandleData[] } }> {
   if (!env.birdeyeApiKey) {
     throw new Error('Birdeye API key is not configured');
   }
@@ -48,13 +56,15 @@ export async function fetchOHLCVData(params: BirdeyeOHLCVParams): Promise<Birdey
   const timeFrom = params.time_from || now - 60 * 60 * 24; // Default: 24h ago
   const timeTo = params.time_to || now;
 
-  const url = new URL('https://public-api.birdeye.so/defi/ohlcv');
+  // Use price history endpoint (this one works!)
+  const url = new URL('https://public-api.birdeye.so/defi/history_price');
   url.searchParams.set('address', params.address);
+  url.searchParams.set('address_type', 'token');
   url.searchParams.set('type', params.type);
   url.searchParams.set('time_from', String(timeFrom));
   url.searchParams.set('time_to', String(timeTo));
 
-  console.log('Fetching OHLCV data:', {
+  console.log('Fetching price history data:', {
     address: params.address,
     type: params.type,
     timeFrom: new Date(timeFrom * 1000).toISOString(),
@@ -80,77 +90,112 @@ export async function fetchOHLCVData(params: BirdeyeOHLCVParams): Promise<Birdey
       throw new Error(`Birdeye API error: ${response.status} - ${errorText}`);
     }
 
-    const json = await response.json();
-    console.log('Birdeye OHLCV response:', {
+    const json: BirdeyePriceHistoryResponse = await response.json();
+    console.log('Birdeye price history response:', {
       success: json.success,
       itemCount: json.data?.items?.length || 0,
     });
 
-    return json;
+    if (!json.success || !json.data?.items) {
+      throw new Error('No price history data returned');
+    }
+
+    // Convert price history to candlestick format
+    const candles = convertPriceHistoryToCandles(json.data.items, params.type);
+    console.log(`Converted to ${candles.length} candles`);
+
+    return {
+      success: true,
+      data: {
+        items: candles
+      }
+    };
   } catch (error) {
-    console.error('Failed to fetch OHLCV data:', error);
+    console.error('Failed to fetch price history:', error);
     throw error;
   }
 }
 
 /**
- * Fetch token information from Birdeye API
+ * Convert price history points to OHLCV candles
  */
-export async function fetchTokenInfo(address: string): Promise<BirdeyeTokenInfo | null> {
-  if (!env.birdeyeApiKey) {
-    console.warn('Birdeye API key is not configured');
-    return null;
-  }
+function convertPriceHistoryToCandles(pricePoints: BirdeyePriceHistoryItem[], intervalType: string): BirdeyeCandleData[] {
+  if (!pricePoints || pricePoints.length === 0) return [];
 
-  const url = `https://public-api.birdeye.so/defi/token_overview?address=${address}`;
+  // Determine interval in seconds
+  const intervalMap: Record<string, number> = {
+    '1m': 60,
+    '5m': 5 * 60,
+    '15m': 15 * 60,
+    '1h': 60 * 60,
+    '4h': 4 * 60 * 60,
+    '1d': 24 * 60 * 60,
+  };
 
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'X-API-KEY': env.birdeyeApiKey,
-      },
-    });
+  const intervalSeconds = intervalMap[intervalType] || 15 * 60;
 
-    if (!response.ok) {
-      console.error('Failed to fetch token info:', response.status);
-      return null;
+  // Group prices by interval
+  const candleMap = new Map<number, {
+    time: number;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    prices: number[];
+  }>();
+
+  pricePoints.forEach(point => {
+    const price = point.value;
+    const time = point.unixTime;
+
+    // Round down to nearest interval
+    const candleTime = Math.floor(time / intervalSeconds) * intervalSeconds;
+
+    if (!candleMap.has(candleTime)) {
+      candleMap.set(candleTime, {
+        time: candleTime,
+        open: price,
+        high: price,
+        low: price,
+        close: price,
+        prices: [price]
+      });
+    } else {
+      const candle = candleMap.get(candleTime)!;
+      candle.high = Math.max(candle.high, price);
+      candle.low = Math.min(candle.low, price);
+      candle.close = price; // Last price in interval
+      candle.prices.push(price);
     }
+  });
 
-    const json = await response.json();
-    if (!json.success || !json.data) {
-      return null;
-    }
-
-    const data = json.data;
-    return {
-      address: data.address || address,
-      symbol: data.symbol || '',
-      name: data.name || '',
-      decimals: data.decimals || 9,
-      liquidity: data.liquidity || 0,
-      price: data.price || 0,
-      priceChange24h: data.priceChange24h || 0,
-      volume24h: data.volume24h || data.v24h || 0,
-      marketCap: data.marketCap || data.mc || 0,
-    };
-  } catch (error) {
-    console.error('Error fetching token info:', error);
-    return null;
-  }
+  // Convert to array and sort by time
+  return Array.from(candleMap.values())
+    .sort((a, b) => a.time - b.time)
+    .map(c => ({
+      time: c.time,
+      open: c.open,
+      high: c.high,
+      low: c.low,
+      close: c.close,
+      volume: 0 // Price history endpoint doesn't provide volume
+    }));
 }
 
 /**
- * Search for tokens by symbol or name
+ * Fetch trending/top tokens from Birdeye API
+ * This endpoint works with our API key!
  */
-export async function searchTokens(query: string): Promise<BirdeyeTokenInfo[]> {
+export async function fetchTrendingTokens(limit: number = 20): Promise<BirdeyeTokenInfo[]> {
   if (!env.birdeyeApiKey) {
     console.warn('Birdeye API key is not configured');
     return [];
   }
 
-  const url = `https://public-api.birdeye.so/defi/search?keyword=${encodeURIComponent(query)}`;
+  // Use tokenlist endpoint sorted by 24h volume (this works!)
+  const url = `https://public-api.birdeye.so/defi/tokenlist?sort_by=v24hUSD&sort_type=desc&offset=0&limit=${limit}`;
+
+  console.log('Fetching trending tokens from Birdeye...');
 
   try {
     const response = await fetch(url, {
@@ -162,28 +207,36 @@ export async function searchTokens(query: string): Promise<BirdeyeTokenInfo[]> {
     });
 
     if (!response.ok) {
-      console.error('Failed to search tokens:', response.status);
+      const errorText = await response.text();
+      console.error('Failed to fetch trending tokens:', response.status, errorText);
       return [];
     }
 
     const json = await response.json();
-    if (!json.success || !json.data) {
+    
+    if (!json.success || !json.data?.tokens) {
+      console.error('Invalid response format');
       return [];
     }
 
-    return (json.data.tokens || []).map((token: any) => ({
+    console.log(`✅ Fetched ${json.data.tokens.length} trending tokens`);
+
+    // Map to our interface
+    return json.data.tokens.map((token: any) => ({
       address: token.address,
       symbol: token.symbol || '',
       name: token.name || '',
       decimals: token.decimals || 9,
       liquidity: token.liquidity || 0,
       price: token.price || 0,
-      priceChange24h: token.priceChange24h || 0,
-      volume24h: token.volume24h || token.v24h || 0,
-      marketCap: token.marketCap || token.mc || 0,
+      priceChange24h: token.v24hChangePercent ?? null,
+      volume24h: token.v24hUSD || 0,
+      marketCap: token.mc || 0,
+      logoURI: token.logoURI,
     }));
   } catch (error) {
-    console.error('Error searching tokens:', error);
+    console.error('Error fetching trending tokens:', error);
     return [];
   }
 }
+

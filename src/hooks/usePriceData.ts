@@ -29,7 +29,7 @@ async function fetchBirdeyeCandles(address: string, type: '1m' | '5m' | '15m' | 
     throw new Error('Missing Birdeye API key');
   }
 
-  console.log('Fetching Birdeye data for:', { 
+  console.log('🔄 Fetching Birdeye price history for:', { 
     address, 
     type, 
     apiKey: env.birdeyeApiKey.substring(0, 8) + '...' 
@@ -47,10 +47,10 @@ async function fetchBirdeyeCandles(address: string, type: '1m' | '5m' | '15m' | 
     }
 
     const candles = mapBirdeyeData(response.data.items);
-    console.log('Successfully fetched Birdeye data:', candles.length, 'candles');
+    console.log('✅ Successfully fetched Birdeye data:', candles.length, 'candles');
     return candles;
   } catch (error) {
-    console.error('Failed to fetch Birdeye data:', error);
+    console.error('❌ Failed to fetch Birdeye data:', error);
     throw error;
   }
 }
@@ -58,19 +58,19 @@ async function fetchBirdeyeCandles(address: string, type: '1m' | '5m' | '15m' | 
 function mapBirdeyeData(rawItems: any[]): CandleDatum[] {
   const mapped: CandleDatum[] = rawItems
     .map((item: any) => {
-      // Birdeye API returns: unixTime, o (open), h (high), l (low), c (close), v (volume)
-      const rawTime = Number(item?.unixTime ?? item?.time ?? item?.timestamp ?? 0);
-      const open = Number(item?.o ?? item?.open ?? item?.priceOpen ?? item?.startPrice ?? item?.value ?? 0);
-      const high = Number(item?.h ?? item?.high ?? item?.priceHigh ?? item?.max ?? open);
-      const low = Number(item?.l ?? item?.low ?? item?.priceLow ?? item?.min ?? open);
-      const close = Number(item?.c ?? item?.close ?? item?.priceClose ?? item?.endPrice ?? item?.value ?? open);
-      const volume = Number(item?.v ?? item?.volume ?? item?.baseVolume ?? item?.quoteVolume ?? 0);
+      // BirdeyeCandleData from our service already has the right format
+      const rawTime = Number(item?.time ?? 0);
+      const open = Number(item?.open ?? 0);
+      const high = Number(item?.high ?? open);
+      const low = Number(item?.low ?? open);
+      const close = Number(item?.close ?? open);
+      const volume = Number(item?.volume ?? 0);
 
       if (!Number.isFinite(rawTime) || rawTime <= 0) return null;
       if (!Number.isFinite(open) || !Number.isFinite(high) || !Number.isFinite(low) || !Number.isFinite(close)) return null;
 
-      // Normalize timestamp to seconds
-      const normalizedTime = (rawTime > 1e12 ? Math.floor(rawTime / 1000) : Math.floor(rawTime)) as UTCTimestamp;
+      // Time is already in seconds from our service
+      const normalizedTime = rawTime as UTCTimestamp;
 
       return {
         time: normalizedTime,
