@@ -15,12 +15,28 @@ function TradingTerminal() {
   const [searchParams] = useSearchParams();
   const [selectedMarket, setSelectedMarket] = useState(tokenMarkets[0]);
   const [interval, setInterval] = useState<'1m' | '5m' | '15m' | '1h' | '4h' | '1d'>('5m');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [contractAddress, setContractAddress] = useState('');
   const { candles, source } = usePriceData({ address: selectedMarket.address, interval });
 
-  // Handle URL parameters for selected coin
+  // Handle URL parameters for selected coin or search
   useEffect(() => {
     const coinParam = searchParams.get('coin');
     const addressParam = searchParams.get('address');
+    const searchParam = searchParams.get('search');
+    
+    if (searchParam) {
+      setSearchQuery(searchParam);
+      // If search looks like a Solana address, use it
+      if (searchParam.length >= 32 && searchParam.length <= 44) {
+        setContractAddress(searchParam);
+        // Try to find or load the token
+        const market = tokenMarkets.find(m => m.address === searchParam);
+        if (market) {
+          setSelectedMarket(market);
+        }
+      }
+    }
     
     if (coinParam && addressParam) {
       // Find the market by symbol or create a new one
@@ -30,6 +46,34 @@ function TradingTerminal() {
       }
     }
   }, [searchParams]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // Check if it's a contract address (Solana addresses are typically 32-44 chars)
+      if (searchQuery.length >= 32 && searchQuery.length <= 44) {
+        setContractAddress(searchQuery);
+        // Try to find the token in our markets
+        const market = tokenMarkets.find(m => 
+          m.address.toLowerCase() === searchQuery.toLowerCase() ||
+          m.symbol.toLowerCase() === searchQuery.toLowerCase() ||
+          m.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        if (market) {
+          setSelectedMarket(market);
+        }
+      } else {
+        // Search by name or symbol
+        const market = tokenMarkets.find(m => 
+          m.symbol.toLowerCase() === searchQuery.toLowerCase() ||
+          m.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        if (market) {
+          setSelectedMarket(market);
+        }
+      }
+    }
+  };
 
   const analytics = useMemo(() => {
     if (!candles.length) {
@@ -82,25 +126,27 @@ function TradingTerminal() {
             </div>
             
             <div className="flex items-center gap-4">
-              <div className="relative">
+              <form onSubmit={handleSearch} className="relative">
                 <input
                   type="text"
                   placeholder="Search by token or CA..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-64 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-white placeholder-white/40 focus:border-accent-400 focus:outline-none"
                 />
-              </div>
-              <button className="rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 px-4 py-2 text-sm font-semibold text-black">
-                Deposit
-              </button>
-              <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
+              </form>
+              <Link to="/wallet" className="rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 px-4 py-2 text-sm font-semibold text-black hover:opacity-90 transition-opacity">
+                Connect Wallet
+              </Link>
+              <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white transition-colors">
                 <Bell className="h-5 w-5" />
               </button>
-              <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
+              <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white transition-colors">
                 <Star className="h-5 w-5" />
               </button>
-              <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
+              <Link to="/wallet" className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white transition-colors">
                 <Wallet className="h-5 w-5" />
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -173,18 +219,28 @@ function TradingTerminal() {
         {selectedMarket && (
           <div className="mb-8">
             <div className="glass-panel rounded-[32px] p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+                <div className="flex-1 min-w-0">
                   <h2 className="text-lg font-semibold text-white">
                     {selectedMarket.name} ({selectedMarket.symbol})
                   </h2>
-                  <p className="text-sm text-white/60">
-                    {source === 'birdeye' ? 'Live data from Birdeye API' : 'Demo data'}
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-sm text-white/60">
+                      {source === 'birdeye' ? 'Live data from Birdeye API' : 'Demo data'}
+                    </p>
+                    {contractAddress && (
+                      <span className="text-xs text-white/40 font-mono truncate max-w-[200px]">
+                        {contractAddress}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-white/40 font-mono mt-1 truncate">
+                    CA: {selectedMarket.address}
                   </p>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-wrap">
                   <TimeframeSelector value={interval} onChange={setInterval} />
-                  <span className={`rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.3em] ${
+                  <span className={`rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.3em] whitespace-nowrap ${
                     source === 'birdeye' 
                       ? 'border-green-400/30 bg-green-400/10 text-green-400' 
                       : 'border-white/10 text-white/50'
@@ -194,9 +250,39 @@ function TradingTerminal() {
                 </div>
               </div>
               
+              {/* Price Stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div className="rounded-xl border border-white/10 bg-black/40 p-4">
+                  <p className="text-xs text-white/50 mb-1">Price</p>
+                  <p className="text-lg font-semibold text-white">${analytics.price.toFixed(6)}</p>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-black/40 p-4">
+                  <p className="text-xs text-white/50 mb-1">24h Change</p>
+                  <p className={`text-lg font-semibold ${analytics.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {analytics.change24h >= 0 ? '+' : ''}{analytics.change24h.toFixed(2)}%
+                  </p>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-black/40 p-4">
+                  <p className="text-xs text-white/50 mb-1">24h High</p>
+                  <p className="text-lg font-semibold text-white">${analytics.high24h.toFixed(6)}</p>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-black/40 p-4">
+                  <p className="text-xs text-white/50 mb-1">24h Low</p>
+                  <p className="text-lg font-semibold text-white">${analytics.low24h.toFixed(6)}</p>
+                </div>
+              </div>
+              
               <div className="overflow-hidden rounded-[30px] border border-white/10 bg-black/40 p-4">
                 <CandlestickChart data={candles} />
               </div>
+              
+              {candles.length === 0 && (
+                <div className="mt-4 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-4">
+                  <p className="text-sm text-yellow-500">
+                    No chart data available. Make sure the Birdeye API key is configured correctly in the .env file.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}

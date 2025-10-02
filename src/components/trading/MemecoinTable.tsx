@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, Coins, Zap, Flame, Sparkles, Star, CircleDollarSign } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface MemecoinData {
   id: string;
   name: string;
   symbol: string;
-  logo: string;
+  iconType: 'coins' | 'zap' | 'flame' | 'sparkles' | 'star' | 'dollar';
   age: string;
   marketCap: number;
   marketCapChange: number;
@@ -20,12 +20,21 @@ interface MemecoinData {
   price: number;
 }
 
+const iconMap = {
+  coins: Coins,
+  zap: Zap,
+  flame: Flame,
+  sparkles: Sparkles,
+  star: Star,
+  dollar: CircleDollarSign,
+};
+
 const memecoinData: MemecoinData[] = [
   {
     id: 'og-og',
     name: 'OG OG',
     symbol: 'OG',
-    logo: '🟢',
+    iconType: 'coins',
     age: '23m',
     marketCap: 400000,
     marketCapChange: -16.2,
@@ -42,7 +51,7 @@ const memecoinData: MemecoinData[] = [
     id: 'grid-grid',
     name: 'GRID GRID',
     symbol: 'GRID',
-    logo: '⚡',
+    iconType: 'zap',
     age: '3m',
     marketCap: 13900,
     marketCapChange: -61.2,
@@ -59,7 +68,7 @@ const memecoinData: MemecoinData[] = [
     id: 'black-blackjack',
     name: 'black Blackjack',
     symbol: 'B',
-    logo: '🃏',
+    iconType: 'star',
     age: '1d',
     marketCap: 3930000,
     marketCapChange: 7.272,
@@ -76,7 +85,7 @@ const memecoinData: MemecoinData[] = [
     id: 'ccm-criminal',
     name: 'CCM Criminal Creato...',
     symbol: 'CCM',
-    logo: '🔫',
+    iconType: 'flame',
     age: '14m',
     marketCap: 54900,
     marketCapChange: 215.3,
@@ -93,7 +102,7 @@ const memecoinData: MemecoinData[] = [
     id: 'sky-sky',
     name: 'SKY SKY',
     symbol: 'SKY',
-    logo: '☁️',
+    iconType: 'sparkles',
     age: '2d',
     marketCap: 352000,
     marketCapChange: 110,
@@ -110,7 +119,7 @@ const memecoinData: MemecoinData[] = [
     id: 'mic-pump',
     name: 'MIC pump mic',
     symbol: 'MIC',
-    logo: '🎤',
+    iconType: 'dollar',
     age: '6m',
     marketCap: 18900,
     marketCapChange: 20.93,
@@ -172,11 +181,16 @@ export function MemecoinTable() {
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="text-2xl">{coin.logo}</div>
-                      <div>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-accent-500">
+                        {(() => {
+                          const Icon = iconMap[coin.iconType];
+                          return <Icon className="h-5 w-5 text-white" />;
+                        })()}
+                      </div>
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-white">{coin.name}</span>
-                          <span className="text-xs text-white/50">{coin.age}</span>
+                          <span className="font-semibold text-white truncate">{coin.name}</span>
+                          <span className="text-xs text-white/50 flex-shrink-0">{coin.age}</span>
                         </div>
                         <div className="flex items-center gap-2 mt-1">
                           <div className={`w-16 h-1 rounded-full ${coin.chart === 'up' ? 'bg-green-400' : 'bg-red-400'}`} />
