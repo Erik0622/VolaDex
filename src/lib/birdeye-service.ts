@@ -74,6 +74,8 @@ export async function fetchOHLCVData(params: BirdeyeOHLCVParams): Promise<{ succ
   try {
     const response = await fetch(url.toString(), {
       method: 'GET',
+      mode: 'cors',
+      credentials: 'omit',
       headers: {
         'Accept': 'application/json',
         'X-API-KEY': env.birdeyeApiKey,
@@ -186,7 +188,7 @@ function convertPriceHistoryToCandles(pricePoints: BirdeyePriceHistoryItem[], in
  * Fetch trending/top tokens from Birdeye API
  * This endpoint works with our API key!
  */
-export async function fetchTrendingTokens(limit: number = 20): Promise<BirdeyeTokenInfo[]> {
+export async function fetchTrendingTokens(limit: number = 50): Promise<BirdeyeTokenInfo[]> {
   if (!env.birdeyeApiKey) {
     console.warn('Birdeye API key is not configured');
     return [];
@@ -200,6 +202,9 @@ export async function fetchTrendingTokens(limit: number = 20): Promise<BirdeyeTo
   try {
     const response = await fetch(url, {
       method: 'GET',
+      mode: 'cors',
+      credentials: 'omit',
+      cache: 'no-cache',
       headers: {
         'Accept': 'application/json',
         'X-API-KEY': env.birdeyeApiKey,
@@ -221,8 +226,27 @@ export async function fetchTrendingTokens(limit: number = 20): Promise<BirdeyeTo
 
     console.log(`✅ Fetched ${json.data.tokens.length} trending tokens`);
 
+    // Filter out stablecoins and only get real memecoins/tokens
+    const filtered = json.data.tokens.filter((token: any) => {
+      const symbol = token.symbol?.toUpperCase() || '';
+      const name = token.name?.toUpperCase() || '';
+      
+      // Exclude stablecoins
+      if (symbol === 'USDC' || symbol === 'USDT' || symbol === 'DAI' || 
+          name.includes('USD COIN') || name.includes('TETHER') || name.includes('USDT')) {
+        return false;
+      }
+      
+      // Only include tokens with reasonable market cap (> $100k)
+      if ((token.mc || 0) < 100000) {
+        return false;
+      }
+      
+      return true;
+    });
+
     // Map to our interface
-    return json.data.tokens.map((token: any) => ({
+    return filtered.map((token: any) => ({
       address: token.address,
       symbol: token.symbol || '',
       name: token.name || '',

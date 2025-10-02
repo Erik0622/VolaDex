@@ -3,6 +3,7 @@ import { ArrowLeft, TrendingUp, TrendingDown } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 
 import { CandlestickChart } from '../components/chart/CandlestickChart';
+import { LineChart } from '../components/chart/LineChart';
 import { TimeframeSelector } from '../components/trading/TimeframeSelector';
 import { usePriceData } from '../hooks/usePriceData';
 
@@ -15,6 +16,7 @@ interface TokenData {
 function ChartPage() {
   const [searchParams] = useSearchParams();
   const [interval, setInterval] = useState<'1m' | '5m' | '15m' | '1h' | '4h' | '1d'>('15m');
+  const [chartType, setChartType] = useState<'candlestick' | 'line'>('candlestick');
   const [token, setToken] = useState<TokenData | null>(null);
 
   // Get token data from URL
@@ -99,7 +101,33 @@ function ChartPage() {
               </p>
             </div>
             
-            <TimeframeSelector value={interval} onChange={setInterval} />
+            <div className="flex items-center gap-4">
+              {/* Chart Type Selector */}
+              <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-black/40 p-1">
+                <button
+                  onClick={() => setChartType('candlestick')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                    chartType === 'candlestick'
+                      ? 'bg-accent-400 text-black'
+                      : 'text-white/60 hover:text-white'
+                  }`}
+                >
+                  Candles
+                </button>
+                <button
+                  onClick={() => setChartType('line')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                    chartType === 'line'
+                      ? 'bg-accent-400 text-black'
+                      : 'text-white/60 hover:text-white'
+                  }`}
+                >
+                  Line
+                </button>
+              </div>
+              
+              <TimeframeSelector value={interval} onChange={setInterval} />
+            </div>
           </div>
 
           {/* Price Stats */}
@@ -146,7 +174,11 @@ function ChartPage() {
         {/* Chart */}
         <div className="rounded-2xl border border-white/10 bg-black/40 p-4 sm:p-6">
           {candles.length > 0 ? (
-            <CandlestickChart data={candles} />
+            chartType === 'candlestick' ? (
+              <CandlestickChart data={candles} />
+            ) : (
+              <LineChart data={candles} />
+            )
           ) : (
             <div className="flex items-center justify-center h-[420px]">
               <div className="text-center">

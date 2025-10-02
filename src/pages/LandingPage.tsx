@@ -1,16 +1,10 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Search, Star, Wallet, Bell, Filter, Grid, Zap, TrendingUp, BarChart3, Eye, Settings, HelpCircle, BookOpen, Play, Users, Target, Activity, Flame, Sparkles, Shield, LineChart, Clock, Award } from 'lucide-react';
+import { ArrowRight, Zap, TrendingUp, BarChart3, Eye, Wallet, Sparkles, Shield, LineChart, Clock, Award, Activity, Settings, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
 
 import { GlowCard } from '../components/ui/GlowCard';
 import { SectionHeader } from '../components/ui/SectionHeader';
 import { StatisticPill } from '../components/ui/StatisticPill';
-import { AnimatedButton } from '../components/ui/AnimatedButton';
-import { formatCompact } from '../lib/format';
-import { useTrendingMemecoins } from '../hooks/useTrending';
-
-// Live trending via Birdeye with fallback inside the hook
 
 const features = [
   {
@@ -39,8 +33,11 @@ const features = [
   }
 ];
 
-const categories = ['Trending', 'Surge', 'DEX Screener', 'Pump Live'];
+// Removed - Now only in Trading Terminal
+// const categories = ['Trending', 'Surge', 'DEX Screener', 'Pump Live'];
 
+// Moved to Trading Terminal
+/*
 function MemecoinInsights() {
   const { data: trending, isSuccess, isLoading, isError } = useTrendingMemecoins();
   const navigate = Link;
@@ -152,137 +149,20 @@ function MemecoinInsights() {
     </div>
   );
 }
+*/
 
+// CategoryTabs moved to Trading Terminal
+/*
 function CategoryTabs() {
-  return (
-    <div className="flex items-center gap-1 mb-8">
-      {categories.map((category, index) => (
-        <motion.button
-          key={category}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-            index === 0
-              ? 'bg-accent-400 text-black'
-              : 'text-white/60 hover:text-white hover:bg-white/5'
-          }`}
-        >
-          {category}
-        </motion.button>
-      ))}
-    </div>
-  );
+  return null;
 }
+*/
 
 function LandingPage() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      // Navigate to trading terminal with search query
-      window.location.href = `/trade?search=${encodeURIComponent(searchQuery)}`;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Navigation */}
-      <nav className="sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-4 sm:gap-8 flex-1">
-              {/* Logo/Brand */}
-              <Link to="/" className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-accent-500">
-                  <Zap className="h-5 w-5 text-white" />
-                </div>
-                <span className="hidden sm:inline text-sm font-semibold text-white">VolaDex</span>
-              </Link>
-              
-              {/* Desktop Navigation */}
-              <div className="hidden lg:flex items-center gap-6">
-                <Link to="/" className="text-sm font-medium text-accent-400">Discover</Link>
-                <Link to="/trade" className="text-sm text-white/60 hover:text-white transition-colors">Trade</Link>
-                <a href="#features" className="text-sm text-white/60 hover:text-white transition-colors">Features</a>
-                <a href="#stats" className="text-sm text-white/60 hover:text-white transition-colors">Stats</a>
-                <Link to="/portfolio" className="text-sm text-white/60 hover:text-white transition-colors">Portfolio</Link>
-                <Link to="/wallet" className="text-sm text-white/60 hover:text-white transition-colors">Wallet</Link>
-              </div>
-            </div>
-            
-            {/* Desktop Actions */}
-            <div className="hidden md:flex items-center gap-2 lg:gap-4">
-              <form onSubmit={handleSearch} className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
-                <input
-                  type="text"
-                  placeholder="Search token or CA..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-48 lg:w-64 rounded-lg border border-white/10 bg-white/5 px-10 py-2 text-sm text-white placeholder-white/40 focus:border-accent-400 focus:outline-none"
-                />
-              </form>
-              <Link to="/trade" className="hidden lg:inline-flex rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 px-4 py-2 text-sm font-semibold text-black hover:opacity-90 transition-opacity">
-                Launch Terminal
-              </Link>
-              <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white transition-colors">
-                <Bell className="h-5 w-5" />
-              </button>
-              <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white transition-colors">
-                <Star className="h-5 w-5" />
-              </button>
-              <Link to="/wallet" className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white transition-colors">
-                <Wallet className="h-5 w-5" />
-              </Link>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden rounded-lg border border-white/10 p-2 text-white/60 hover:text-white"
-            >
-              {mobileMenuOpen ? <Filter className="h-5 w-5" /> : <Grid className="h-5 w-5" />}
-            </button>
-          </div>
-
-          {/* Mobile Menu */}
-          {mobileMenuOpen && (
-            <div className="md:hidden border-t border-white/10 py-4 space-y-4">
-              <form onSubmit={handleSearch} className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
-                <input
-                  type="text"
-                  placeholder="Search token or CA..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-10 py-2 text-sm text-white placeholder-white/40 focus:border-accent-400 focus:outline-none"
-                />
-              </form>
-              <div className="flex flex-col gap-2">
-                <Link to="/" className="text-sm font-medium text-accent-400 px-3 py-2 rounded-lg hover:bg-white/5">Discover</Link>
-                <Link to="/trade" className="text-sm text-white/60 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5">Trade</Link>
-                <a href="#features" className="text-sm text-white/60 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5">Features</a>
-                <a href="#stats" className="text-sm text-white/60 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5">Stats</a>
-                <Link to="/portfolio" className="text-sm text-white/60 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5">Portfolio</Link>
-                <Link to="/wallet" className="text-sm text-white/60 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5">Wallet</Link>
-              </div>
-              <Link to="/trade" className="block text-center rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 px-4 py-2 text-sm font-semibold text-black">
-                Launch Terminal
-              </Link>
-            </div>
-          )}
-        </div>
-      </nav>
-
       {/* Main Content */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
-        {/* Category Tabs */}
-        <CategoryTabs />
-
-        {/* Memecoin Insights */}
-        <MemecoinInsights />
 
         {/* Hero Section */}
         <section className="mt-16 sm:mt-24 text-center px-4">
