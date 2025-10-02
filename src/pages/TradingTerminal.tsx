@@ -34,16 +34,15 @@ function TradingTerminal() {
       } else {
         // Create a new market entry for this token
         console.log('Creating new market for address:', addressParam);
-        const newMarket = {
-          id: addressParam,
+        const newMarket: typeof tokenMarkets[0] = {
           name: symbolParam || 'Unknown Token',
           symbol: symbolParam || '???',
           address: addressParam,
+          tag: 'meme',
           price: 0,
+          change1h: 0,
           change24h: 0,
           volume24h: 0,
-          marketCap: 0,
-          liquidity: 0,
         };
         setSelectedMarket(newMarket);
       }
@@ -227,11 +226,6 @@ function TradingTerminal() {
                     <p className="text-sm text-white/60">
                       {source === 'birdeye' ? 'Live data from Birdeye API' : 'Demo data'}
                     </p>
-                    {contractAddress && (
-                      <span className="text-xs text-white/40 font-mono truncate max-w-[200px]">
-                        {contractAddress}
-                      </span>
-                    )}
                   </div>
                   <p className="text-xs text-white/40 font-mono mt-1 truncate">
                     CA: {selectedMarket.address}
