@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { ArrowLeft, Bell, Star, Wallet, Filter, Grid, TrendingUp, Settings, HelpCircle, BookOpen } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { walletService } from '../lib/wallet';
 
 import { CandlestickChart } from '../components/chart/CandlestickChart';
 import { MemecoinTable } from '../components/trading/MemecoinTable';
@@ -13,8 +14,10 @@ import { formatPercent } from '../lib/format';
 
 function TradingTerminal() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [selectedMarket, setSelectedMarket] = useState(tokenMarkets[0]);
   const [interval, setInterval] = useState<'1m' | '5m' | '15m' | '1h' | '4h' | '1d'>('5m');
+  const [selectedCategory, setSelectedCategory] = useState('Trending');
   const { candles, source } = usePriceData({ address: selectedMarket.address, interval });
 
   // Handle URL parameters for selected coin
@@ -98,7 +101,10 @@ function TradingTerminal() {
               <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
                 <Star className="h-5 w-5" />
               </button>
-              <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
+              <button 
+                onClick={() => navigate('/wallet')}
+                className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white"
+              >
                 <Wallet className="h-5 w-5" />
               </button>
             </div>
@@ -107,15 +113,16 @@ function TradingTerminal() {
       </nav>
 
       {/* Main Content */}
-      <div className="mx-auto max-w-7xl px-6 py-8">
-        {/* Tabs and Controls */}
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-1">
-            {['Trending', 'Surge', 'DEX Screener', 'Pump Live'].map((category, index) => (
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-8">
+        {/* Mobile-First Category Tabs */}
+        <div className="mb-6">
+          <div className="flex overflow-x-auto scrollbar-hide gap-2 pb-2">
+            {['Trending', 'Surge', 'DEX Screener', 'Pump Live', 'Top Gainers', 'New Listings', 'High Volume'].map((category) => (
               <button
                 key={category}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  index === 0
+                onClick={() => setSelectedCategory(category)}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
+                  selectedCategory === category
                     ? 'bg-accent-400 text-black'
                     : 'text-white/60 hover:text-white hover:bg-white/5'
                 }`}
@@ -124,13 +131,17 @@ function TradingTerminal() {
               </button>
             ))}
           </div>
-          
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
+        </div>
+
+        {/* Mobile Controls - Stacked Layout */}
+        <div className="mb-6 space-y-4">
+          {/* Timeframe and Filter Controls */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
               {['1m', '5m', '30m', '1h'].map((timeframe, index) => (
                 <button
                   key={timeframe}
-                  className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                  className={`px-3 py-1 text-xs font-medium rounded transition-colors whitespace-nowrap ${
                     index === 1
                       ? 'bg-white/10 text-white'
                       : 'text-white/60 hover:text-white hover:bg-white/5'
@@ -141,32 +152,35 @@ function TradingTerminal() {
               ))}
             </div>
             
-            <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
-              <Filter className="h-4 w-4" />
-            </button>
-            <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
-              <Grid className="h-4 w-4" />
-            </button>
-            
-            <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2">
-              <span className="text-xs text-white/60">Quick Buy</span>
-              <input
-                type="text"
-                placeholder="0.0"
-                className="w-16 bg-transparent text-sm text-white placeholder-white/40 focus:outline-none"
-              />
-              <div className="flex gap-1">
-                <button className="rounded px-2 py-1 text-xs font-medium bg-accent-400 text-black">P1</button>
-                <button className="rounded px-2 py-1 text-xs font-medium text-white/60 hover:bg-white/10">P2</button>
-                <button className="rounded px-2 py-1 text-xs font-medium text-white/60 hover:bg-white/10">P3</button>
-              </div>
+            <div className="flex items-center gap-2">
+              <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
+                <Filter className="h-4 w-4" />
+              </button>
+              <button className="rounded-lg border border-white/10 p-2 text-white/60 hover:text-white">
+                <Grid className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+          
+          {/* Quick Buy Section - Mobile Optimized */}
+          <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-3">
+            <span className="text-xs text-white/60">Quick Buy</span>
+            <input
+              type="text"
+              placeholder="0.0"
+              className="flex-1 bg-transparent text-sm text-white placeholder-white/40 focus:outline-none"
+            />
+            <div className="flex gap-1">
+              <button className="rounded px-2 py-1 text-xs font-medium bg-accent-400 text-black">P1</button>
+              <button className="rounded px-2 py-1 text-xs font-medium text-white/60 hover:bg-white/10">P2</button>
+              <button className="rounded px-2 py-1 text-xs font-medium text-white/60 hover:bg-white/10">P3</button>
             </div>
           </div>
         </div>
 
         {/* Main Memecoin Table */}
         <div className="mb-8">
-          <MemecoinTable />
+          <MemecoinTable category={selectedCategory} />
         </div>
 
         {/* Selected Coin Chart Section */}
@@ -178,9 +192,6 @@ function TradingTerminal() {
                   <h2 className="text-lg font-semibold text-white">
                     {selectedMarket.name} ({selectedMarket.symbol})
                   </h2>
-                  <p className="text-sm text-white/60">
-                    {source === 'birdeye' ? 'Live data from Birdeye API' : 'Demo data'}
-                  </p>
                 </div>
                 <div className="flex items-center gap-4">
                   <TimeframeSelector value={interval} onChange={setInterval} />

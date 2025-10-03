@@ -18,6 +18,11 @@ interface MemecoinData {
   tokenInfo: number[];
   chart: 'up' | 'down';
   price: number;
+  category?: string;
+}
+
+interface MemecoinTableProps {
+  category?: string;
 }
 
 const memecoinData: MemecoinData[] = [
@@ -36,7 +41,8 @@ const memecoinData: MemecoinData[] = [
     sells: 694,
     tokenInfo: [38.81, 3.48, 802, 448],
     chart: 'up',
-    price: 0.000123
+    price: 0.000123,
+    category: 'Trending'
   },
   {
     id: 'grid-grid',
@@ -53,7 +59,8 @@ const memecoinData: MemecoinData[] = [
     sells: 269,
     tokenInfo: [45.2, 2.1, 156, 89],
     chart: 'down',
-    price: 0.000089
+    price: 0.000089,
+    category: 'Surge'
   },
   {
     id: 'black-blackjack',
@@ -70,7 +77,8 @@ const memecoinData: MemecoinData[] = [
     sells: 94,
     tokenInfo: [52.1, 4.8, 234, 156],
     chart: 'up',
-    price: 0.000456
+    price: 0.000456,
+    category: 'DEX Screener'
   },
   {
     id: 'ccm-criminal',
@@ -87,7 +95,8 @@ const memecoinData: MemecoinData[] = [
     sells: 141,
     tokenInfo: [67.8, 1.2, 445, 123],
     chart: 'up',
-    price: 0.000234
+    price: 0.000234,
+    category: 'Top Gainers'
   },
   {
     id: 'sky-sky',
@@ -104,7 +113,8 @@ const memecoinData: MemecoinData[] = [
     sells: 146,
     tokenInfo: [41.3, 5.7, 189, 234],
     chart: 'up',
-    price: 0.000567
+    price: 0.000567,
+    category: 'Trending'
   },
   {
     id: 'mic-pump',
@@ -121,7 +131,63 @@ const memecoinData: MemecoinData[] = [
     sells: 120,
     tokenInfo: [48.9, 3.1, 167, 89],
     chart: 'up',
-    price: 0.000345
+    price: 0.000345,
+    category: 'Pump Live'
+  },
+  // Additional tokens for new categories
+  {
+    id: 'moon-rocket',
+    name: 'MOON Rocket',
+    symbol: 'MOON',
+    logo: '🚀',
+    age: '1h',
+    marketCap: 2500000,
+    marketCapChange: 450.5,
+    liquidity: 180000,
+    volume: 890000,
+    txns: 2100,
+    buys: 1450,
+    sells: 650,
+    tokenInfo: [68.5, 12.3, 892, 445],
+    chart: 'up',
+    price: 0.001234,
+    category: 'Top Gainers'
+  },
+  {
+    id: 'fresh-new',
+    name: 'Fresh New Token',
+    symbol: 'FRESH',
+    logo: '🌟',
+    age: '15m',
+    marketCap: 45000,
+    marketCapChange: 125.7,
+    liquidity: 32000,
+    volume: 156000,
+    txns: 890,
+    buys: 567,
+    sells: 323,
+    tokenInfo: [63.7, 8.9, 445, 234],
+    chart: 'up',
+    price: 0.000567,
+    category: 'New Listings'
+  },
+  {
+    id: 'volume-king',
+    name: 'Volume King',
+    symbol: 'VK',
+    logo: '👑',
+    age: '2h',
+    marketCap: 1200000,
+    marketCapChange: 89.3,
+    liquidity: 280000,
+    volume: 2100000,
+    txns: 4500,
+    buys: 2800,
+    sells: 1700,
+    tokenInfo: [62.2, 15.6, 1234, 678],
+    chart: 'up',
+    price: 0.002345,
+    category: 'High Volume'
   }
 ];
 
@@ -135,7 +201,7 @@ function formatCompact(num: number): string {
   return num.toString();
 }
 
-export function MemecoinTable() {
+export function MemecoinTable({ category = 'Trending' }: MemecoinTableProps) {
   const [selectedCoin, setSelectedCoin] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -145,10 +211,73 @@ export function MemecoinTable() {
     navigate(`/trade?coin=${coin.symbol}&address=${coin.id}`);
   };
 
+  // Filter tokens by category
+  const filteredTokens = memecoinData.filter(token => 
+    category === 'Trending' || token.category === category
+  );
+
   return (
     <div className="w-full">
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/40">
-        <div className="overflow-x-auto">
+      {/* Mobile Card Layout */}
+      <div className="block sm:hidden space-y-4">
+        {filteredTokens.map((coin) => (
+          <div 
+            key={coin.id}
+            className={`rounded-2xl border border-white/10 bg-black/40 p-4 hover:bg-white/5 transition-colors cursor-pointer ${
+              selectedCoin === coin.id ? 'bg-accent-400/10 border-accent-400/30' : ''
+            }`}
+            onClick={() => handleCoinClick(coin)}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="text-2xl">{coin.logo}</div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-white">{coin.name}</span>
+                    <span className="text-xs text-white/50">{coin.age}</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className={`w-12 h-1 rounded-full ${coin.chart === 'up' ? 'bg-green-400' : 'bg-red-400'}`} />
+                    <span className="text-xs text-white/40">{coin.symbol}</span>
+                  </div>
+                </div>
+              </div>
+              <button className="rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 px-3 py-1 text-xs font-semibold text-black hover:opacity-90 transition-opacity">
+                Buy
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <div className="text-white/50 text-xs">Market Cap</div>
+                <div className="font-mono text-white">${formatCompact(coin.marketCap)}</div>
+                <div className={`text-xs flex items-center gap-1 ${
+                  coin.marketCapChange >= 0 ? 'text-green-400' : 'text-red-400'
+                }`}>
+                  {coin.marketCapChange >= 0 ? (
+                    <TrendingUp className="h-3 w-3" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3" />
+                  )}
+                  {coin.marketCapChange >= 0 ? '+' : ''}{coin.marketCapChange.toFixed(1)}%
+                </div>
+              </div>
+              
+              <div>
+                <div className="text-white/50 text-xs">Volume</div>
+                <div className="font-mono text-white">${formatCompact(coin.volume)}</div>
+                <div className="text-xs text-white/50">
+                  {coin.buys} buys / {coin.sells} sells
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop Table Layout */}
+      <div className="hidden sm:block overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+        <div className="overflow-x-auto scrollbar-hide">
           <table className="w-full">
             <thead className="border-b border-white/10">
               <tr className="text-xs uppercase tracking-[0.3em] text-white/50">
@@ -162,7 +291,7 @@ export function MemecoinTable() {
               </tr>
             </thead>
             <tbody>
-              {memecoinData.map((coin) => (
+              {filteredTokens.map((coin) => (
                 <tr 
                   key={coin.id} 
                   className={`border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer ${

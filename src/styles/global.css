@@ -49,3 +49,13 @@ body::before {
   background: rgba(56, 107, 255, 0.6);
   color: white;
 }
+
+/* Mobile scrollbar hiding */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
